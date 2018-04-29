@@ -512,7 +512,7 @@ Om PHP te installeren loggen we, indien nodig, eerst in onze distribute in als r
 [root@virtualbox ~]# pacman -S php
 ```
 
-# Configuratie
+## Configuratie
 
 Nu PHP geïnstalleerd is moeten we ook een aantal zaken gaan configureren. PHP is geen service zoals **MariaDB** of **Apache** en moet dus ook niet geactiveerd worden. Standaard zijn echter heel wat uitbreidingen niet geactiveerd. Aangezien wij via PHP onze MySQL databank wensen te bevragen zullen wij deze functionaliteit moeten activeren. Dit doen door het bestand **/etc/php/php.ini aan te passen**. Open het bestand met **vi** of **nano** en zoek naar de regel **;extension=pdo_mysql** en verwijder de ; aan het begin van de regel om deze extensie te activeren. Sla de wijzigingen in het bestand op. Controleer nu of het bestand **pdo_mysql.so** aanwezig is in de map **/usr/lib/php/modules/**
 
@@ -521,3 +521,141 @@ Nu PHP geïnstalleerd is moeten we ook een aantal zaken gaan configureren. PHP i
 **AANDACHT:** Elke wijziging in php.ini zorgt er voor dat de Apache server moet herstart worden (zie [Apache](#apache)).
 
 Hiermee zit de installatie en configuratie voor PHP er op.
+
+# Apache
+
+Als laatste stap om onze **LAMP** stack te vervolledigen gaan **Apache** installeren. Hierop zullen wij dan een webapplicatie draaien bestaande uit twee eenvoudige PHP pagina's om aan te tonen dat PHP effectief draait en we data uit onze testdatabank kunnen ophalen.
+
+# Installatie
+
+Om Apache te installeren loggen we, indien nodig, eerst in onze distribute in als root. We installeren naast **Apache** ook al onmiddellijk de uitbreiding voor PHP mee. Na inloggen voeren we in de commandprompt het volgende uit.
+
+```bash
+[root@virtualbox ~]# pacman -S apache php-apache
+```
+
+Net zoals bij MariaDB het geval was, moeten we ook Apache als service activeren en starten. Merk op dat de naam van de service niet **Apache** is maar **httpd**!
+
+```bash
+[root@virtualbox ~]# systemctl enable httpd
+[root@virtualbox ~]# systemctl start httpd
+```
+
+Controleer ook nu de status van de **httpd** service
+
+```bash
+[root@virtualbox ~]# systemctl status httpd
+```
+
+Onze Apache webserver draait nu. Dit betekent dat we via een browser in ons host besturingssysteem naar http://192.168.56.56 kunnen surfen en zo de indexpagina van onze wesbite bereiken. Test dit nu uit!
+
+![Indexpagina Apache](./afb/apache_index.png)
+
+## Configuratie
+
+Nu onze service draait gaan we deze verder configureren zodat we PHP pagina's kunnen laden. Het eerste wat we moeten instellen is de locatie waar de bestanden van onze website zullen komen. Dit doen we door het bestand **/etc/httpd/conf/httpd.conf** aan te passen, dus open dit bestand via **vi** of **nano**. Zoek naar volgende regels:
+
+```bash
+LoadModule mpm_event_module modules/mod_mpm_event.so
+#LoadModule mpm_prefork_module modules/mod_mpm_prefork.so
+``` 
+
+Verplaats nu de **#** van de regel met prefork naar de regel met event. We willen immers de **mpm_prefork_module** gebruiken omdat deze beter overweg kan met threading bij PHP.
+
+Voer onder de laatste #loadmodule regel volgende regels specifiek voor php toe:
+
+```bash
+LoadModule php7_module modules/libphp7.so
+AddHandler php7-script .php
+```
+
+Zoek nu verder naar de regels:
+
+```bash
+DocumentRoot "/srv/http"
+<Directory "/srv/http">
+```
+
+Deze instelling geeft aan dat wij de documenten van onze website in de map **/srv/http/** zullen plaatsen. Voor de eenvoud van deze workshop worden deze mappen NIET aangepast.
+
+Zoek nu naar de regels:
+
+```bash
+<IfModule dir_module>
+	DirectoryIndex index.html
+</IfModule
+```
+
+Voer na index.html ook de tekst index.php toe.
+
+Ga nu helemaal naar onder in het bestand en voeg volgende regels toe voor php:
+
+```bash
+# PHP 7
+Include conf/extra/php7_module.conf
+```
+
+Sla de wijzigen op in het bestand en herstart nu de httpd service met **systemctl restart httpd**
+
+Controleer steeds na het herstarten van een service zijn status!
+
+## Testpagina's toevoegen
+
+Als laatste stap gaan we nu twee pagina's toevoegen op onze website. Zoals uit vorige paragraaf bleek moeten we deze bestanden aan de **/srv/http** map toevoegen. Voor volgend command uit om de index pagina te testen waarin we onze php informatie weergeven:
+
+```bash
+[root@virtualbox ~]# echo "<?php phpinfo(); ?>" > /srv/http/index.php
+```
+
+Open nu op de host jouw browser opnieuw en surf naar http://192.168.56.56/ Indien alles gelukt is ziet u de informatie pagina van php zoals hieronder
+
+![PHP overzichtpagina Apache](./afb/apache_php.png)
+
+Indien dit zo is dan is de integratie van PHP met Apache gelukt. Een laatste stap is nu een pagina te maken waarbij onze data uit de databank geladen word. Maakt hiervoor in de map **/srv/http** een bestand **databank.php** aan en plaats volgende code in dat bestand.
+
+```php
+<?php
+// De details voor connectie met databank
+$DB_host = "localhost";
+$DB_port = "3306";
+$DB_user = "root";
+$DB_password = "VUL DIT AAN MET JOUW WACHTWOORD";
+$DB_name = "test";
+
+
+// Proberen om een databank connectie op te zetten
+try
+{
+    $DB_con = new PDO("mysql:host=$DB_host:$DB_port;dbname=$DB_name",$DB_user,$DB_password);
+    $DB_con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+}
+catch(PDOException $e)
+{
+    echo $e->getMessage();
+}
+
+try {
+    // alle testusers ophalen 
+    $sql = "SELECT * FROM user ORDER BY name";
+    $stmt = $DB_con->prepare($sql); 
+    $stmt->execute();
+    // De resultaten van de query afdrukken in onze pagina
+    $gebruikers = $stmt->fetchAll();
+    print_r($gebruikers);
+} 
+catch (PDOException $e) {
+    echo $e->getMessage();
+}
+
+?>
+```
+
+Ga nu in de browser van je host naar http://192.168.56.56/databank.php en u zou een overzicht van de gebruikers moeten zien als volgt:
+
+![Databank Apache](./afb/apache_databank.png)
+
+Dit betekent dat we onze MySQL databank kunnen aanspreken vanuit PHP op onze Apache webserver. Hiermee is onze LAMP stack opgezet!!
+
+**EXTRA:** om niet altijd bestanden manueel te moeten typen op onze server kiezen we uiteraard voor een gemakkelijkere manier. Enerzijds kan je een **FTP** server (of **SFTP**) opzetten zodat je met een FTP-client vanop de host bestanden kan opladen naar de map van de webserver. Anderzijds kan je ook een script uitvoeren die automatisch alle gewijzigde bestanden uit een gedeelde map op de host kopieert naar de map van de website op de server. Beide oplossingen zijn beschreven in [Uitbreidingen](#uitbreidingen).
+
+# Uitbreidingen
