@@ -19,9 +19,9 @@ author: ing. Sebastiaan Labijn
 
 # Inleiding
 
-Tijdens deze workshop gaan we in VirtualBox een eenvoudige webserver installeren 
-en configureren. Dit gaan we doen door een zogenaamde LAMP stack op te zetten. 
-LAMP staat voor Linux – Apache – MariaDB – PHP. Deze vier technologieën gaan we 
+Tijdens deze workshop gaan we in **VirtualBox** een eenvoudige webserver installeren 
+en configureren. Dit gaan we doen door een zogenaamde **LAMP** stack op te zetten. 
+LAMP staat voor **Linux – Apache – MariaDB – PHP**. Deze vier technologieën gaan we 
 stap voor stap installeren en configureren. Als einddoel hebben we dan een simpele
 webserver opgezet in een virtuele omgeving.
 
@@ -33,7 +33,9 @@ Afspraken doorheen deze workshop:
 * toetsenaanslagen worden geplaatst tussen " ", b.v.:&nbsp;"ctrl + c"
 * (deel)inhoud van bestanden is in een kader afgedrukt (indien mogelijk met syntaxcoloring)
 * voor de eenvoud wordt alles met user **root** uitgewerkt. Er worden dus geen 
-extra accounts gebruikt (zie **Workshop LAMP expert** voor zo een aanpak)
+extra accounts gebruikt 
+
+Voor een uitgebreidere workshop waarbij o.a. meerdere gebruikers en partities gebruikt worden kan u terecht in [**Workshop LAMP expert**](/workshop_lamp_expert.md).
 
 # Voorbereiding
 
@@ -291,7 +293,7 @@ Nu gaan we de bestanden genereren die toelaten dat linux geboot kan worden, de *
 [root@archiso /]# mkinitcpio -p linux
 ```
 
-Tijdens het genereren krijgt u een uitvoer gelijkaardig aan onderstaande afbeelding. U zal een waarschuwing krijgen dat firmware **aic94xx** en **wd719x** ontbreken. Deze zijn te negeren (zie Expert versie om deze waarschuwingen weg te werken).
+Tijdens het genereren krijgt u een uitvoer gelijkaardig aan onderstaande afbeelding. U zal een waarschuwing krijgen dat firmware **aic94xx** en **wd719x** ontbreken. Deze zijn te negeren (zie **Workshop LAMP expert**](/workshop_lamp_expert.md) om deze waarschuwingen weg te werken).
 
 ![Initramfs](./afb/initramfs.png)
 
@@ -711,7 +713,7 @@ Hierdoor is de installatie van **phpMyAdmin** geslaagd. Links in de boomstructuu
 
 ## FTP server
 
-Momenteel maken we de bestanden onze server manueel aan en wordt ook op de server zelf de inhoud via **vi** of **nano** toegevoegd. Dit is echter zeer omslachting. Om bestanden van uit onze host te kunnen opladen naar onze server gaan we een **FTP** service opzetten met **bftpd** (Voor **SFTP** en **SSH** zie de "Workshop LAMP Expert").
+Momenteel maken we de bestanden onze server manueel aan en wordt ook op de server zelf de inhoud via **vi** of **nano** toegevoegd. Dit is echter zeer omslachting. Om bestanden van uit onze host te kunnen opladen naar onze server gaan we een **FTP** service opzetten met **bftpd** (Voor **SFTP** en **SSH** zie **Workshop LAMP expert**](/workshop_lamp_expert.md)).
 
 ### Installatie
 
