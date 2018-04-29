@@ -740,7 +740,7 @@ Aangezien **FTP** een service is moeten we deze dus opnieuw activeren en starten
 [root@virtualbox ~]# systemctl start bftpd
 ```
 
-Gebruikt nu een ftp-client op de host, b.v.: **FileZilla**, en maak een verbinding als root user. U kan ook in de browser surfen naar [**ftp://192.168.56.56**](ftp://192.168.56.56) en aanmelden als root. In beide gevallen zal u de hoofdmap van onze website zien met daarin de eerder aangemaakte PHP bestanden:
+Gebruikt nu een ftp-client op de host, b.v.: **FileZilla**, en maak een verbinding als root user. U kan ook in de browser surfen naar [**ftp**](ftp://192.168.56.56) en aanmelden als root. In beide gevallen zal u de hoofdmap van onze website zien met daarin de eerder aangemaakte PHP bestanden:
  
 ![Index ftp server](./afb/ftp_index.png)
 
