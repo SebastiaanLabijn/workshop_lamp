@@ -5,8 +5,8 @@ author: ing. Sebastiaan Labijn
 
 # Inhoudsopgave
 
-1. Inleiding
-2. Voorbereiding
+1. [Inleiding](#inleiding)
+2. [Voorbereiding](#voorbereiding)
 	* Linux distributie downloaden
 	* Aanmaken nieuwe virtuele machine
 3. [Arch Linux](#arch-linux)
@@ -24,18 +24,18 @@ author: ing. Sebastiaan Labijn
 	* Hostname instellen
 	* Bootloader
 	* Netwerk instellen
-4. MariaDB
+4. [MariaDB](#mariadb)
 	* Installatie
 	* Configuratie
 	* Testdatabank aanmaken
-5. PHP
+5. [PHP](#php)
 	* Installatie
 	* Configuratie
-6. Apache
+6. [Apache](#apache)
 	* Installatie
 	* Configuratie
 	* Testpagina's toevoegen
-7. Uitbreidingen
+7. [Uitbreidingen](#uitbreidingen)
 	* phpMyAdmin
 	* SSH
 	* SFTP server
