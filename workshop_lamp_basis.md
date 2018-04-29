@@ -179,8 +179,7 @@ aangemaakt.
 ![fdisk wijzigingen wegschrijven](./afb/fdisk_sync.png)
 
 We hebben nu wel een opstartbare harde schijf aangemaakt met een partitie maar 
-deze beschikt nog niet over een bestandssysteem. In deze workshopIndien je een GUI installeert ook in die shell kleuren wilt, voert u ook volgend commando uit 
-echo “alias ‘ls’=’ls --color=always’” >> ~/.bashrc gaan we 
+deze beschikt nog niet over een bestandssysteem. In deze workshop gaan we 
 gebruik maken van het **fourth extended file system** ofwel **ext4**. Dit is de 
 standaard bestandsindeling voor huidige Linuxdistributies. Via volgend commando 
 wordt onze partitie geformatteerd naar ext4
@@ -776,7 +775,7 @@ Om het manuele werk dat we moeten doen via **FTP** door telkens de bestanden op 
 
 Het script dat automatisch zal synchroniseren zal draaien als een systeemservice. We gaan dus een eigen service schrijven en deze toevoegen. 
 
-De synchronisatie zelf gebeurd via rsync. Dit pakket is niet standaard meegeleverd dus dit zullen we eerst installeren.
+De synchronisatie zelf gebeurd via **rsync**. Dit pakket is niet standaard meegeleverd dus dit zullen we eerst installeren.
 
 ```bash
 [root@virtualbox ~]# pacman -S rsync
@@ -811,8 +810,8 @@ Description=Sync Website
 [Service]
 ExecStart=/root/sync.sh
 Restart=always
-# Synchronisatie elke 10 seconden uitvoeren
-RestartSec=10
+# Synchronisatie elke 5 seconden uitvoeren
+RestartSec=5
 
 [Install]
 Alias=websitesync.service
@@ -837,15 +836,16 @@ Het enige wat nu nog rest is de service effectief te activeren en te starten vol
 Plaats nu nog enkele bestanden op de host in de gedeelde map en controleer of deze ook op de server er bij komen.
 Herstart ook de virtuele machine en controleer de status van de service na reboot. Deze zou nog altijd moeten actief zijn.
 
-Om de status van een service constant, in ons voorbeeld om de halve seconde, te monitoren kan u gebruik maken van 
+Om de status van een service constant, in ons voorbeeld om de halve seconde, te monitoren kan u gebruik maken van onderstaand commando.
 
 ```bash
-[root@virtualbox ~]# watch –n 0.5 systemctl status  websitesync.service
+[root@virtualbox ~]# watch –n 0.5 systemctl status websitesync.service
 ```
+
 Deze 'blokkeert' wel de terminal voor gebruikersinvoer, dus u kan de **watch** altijd onderbreken met "ctrl + c".
 
 **TIP:** voeg het commando van **watch** als alias toe aan .bash_rc om zo gemakkelijk nadien de synchronisatie te kunnen monitoren zonder altijd he volledige commando te moeten typen
 
 ```bash
-[root@virtualbox ~]# echo alias watchsync="watch –n 0.5 systemctl status  websitesync.service" >> ~/.bash_rc
+[root@virtualbox ~]# echo "alias 'watchsync'='watch –n 0.5 systemctl status websitesync.service'" >> ~/.bashrc
 ```
