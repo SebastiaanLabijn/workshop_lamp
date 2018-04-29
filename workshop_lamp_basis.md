@@ -9,7 +9,7 @@ author: ing. Sebastiaan Labijn
 2. Voorbereiding
 	* Linux distributie downloaden
 	* Aanmaken nieuwe virtuele machine
-3. ArchLinux
+3. [Arch Linux](#Arch Linux)
 	* Voorbereiding
 	* Toestenbordindeling instellen
 	* Controleren of we met het internet verbonden zijn
@@ -69,9 +69,9 @@ extra accounts gebruikt (zie **Workshop LAMP expert** voor zo een aanpak)
 Als Linux distributie kiezen we voor [**Arch Linux**](https://www.archlinux.org/).
  Deze wordt wegens *bleeding-edge* niet aangeraden voor server installaties maar
  we gebruiken deze omdat we ook de installatiestappen van Linux zelf willen bestuderen.
- Ook wordt deze distributie standaard geïnstalleerd zonder GUI. Download [hier] 
+ Ook wordt deze distributie standaard geïnstalleerd zonder GUI. Download [hier]
 (https://www.archlinux.org/download/) de laatste versie. Daarnaast heeft deze 
-distributie ook een uitgebreide documentatie terug te vinden op [**ArchWiki**] 
+distributie ook een uitgebreide documentatie terug te vinden op [**ArchWiki**]
 (https://wiki.archlinux.org/).
 
 ## Aanmaken nieuwe virtuele machine
@@ -90,7 +90,7 @@ Maak nu in VirtualBox een nieuwe machine aan met volgende parameters:
 	* 1: NAT
 	* 2: Host-Only (Kies bij 'name'  de aangemaakte netwerkadapter van hierboven)
 
-# ArchLinux
+# Arch Linux
 
 ## Voorbereiding
 
