@@ -7,7 +7,6 @@ author: ing. Sebastiaan Labijn
 
 1. [Inleiding](#inleiding)
 2. [Voorbereiding](#voorbereiding)
-	* Linux distributie downloaden
 3. [Arch Linux](#arch-linux)
 4. [MariaDB](#mariadb)
 5. [PHP](#php)
@@ -499,4 +498,26 @@ Hiermee is de installatie en configuratie voor MariaDB klaar.
 
 **AANDACHT:** in een professionele omgeving worden aparte gebruikers aangemaakt per databank. Hier wordt voor de gemakkelijkheid enkel de root user gebruikt.
 
-**EXTRA:** om niet altijd alle SQL queries via command prompt te moeten ingeven kan je ook het pakket **phpMyAdmin** installeren om via de browser op de host jouw databank te beheren (zie Uitbreidingen).
+**EXTRA:** om niet altijd alle SQL queries via command prompt te moeten ingeven kan je ook het pakket **phpMyAdmin** installeren om via de browser op de host jouw databank te beheren (zie [Uitbreidingen](#uitbreidingen)).
+
+# PHP
+
+De volgende stap is om **PHP** te installeren. PHP is een eenvoudig aan te leren scripttaal waarbij we serverside inhoud kunnen genereren om zo onze HTML pagina's verrijken.
+
+## Installatie
+
+Om PHP te installeren loggen we, indien nodig, eerst in onze distribute in als root. Nadien installeren we PHP als volgt:    
+
+```bash
+[root@virtualbox ~]# pacman -S php
+```
+
+# Configuratie
+
+Nu PHP geïnstalleerd is moeten we ook een aantal zaken gaan configureren. PHP is geen service zoals **MariaDB** of **Apache** en moet dus ook niet geactiveerd worden. Standaard zijn echter heel wat uitbreidingen niet geactiveerd. Aangezien wij via PHP onze MySQL databank wensen te bevragen zullen wij deze functionaliteit moeten activeren. Dit doen door het bestand **/etc/php/php.ini aan te passen**. Open het bestand met **vi** of **nano** en zoek naar de regel **;extension=pdo_mysql** en verwijder de ; aan het begin van de regel om deze extensie te activeren. Sla de wijzigingen in het bestand op. Controleer nu of het bestand **pdo_mysql.so** aanwezig is in de map **/usr/lib/php/modules/**
+
+**TIP:** Het kan ook handig zijn om **display errors = on** in **/etc/php/php.ini** te plaatsen. Deze staat nu nog op 'off'. Indien deze 'on' staat zullen eventuele fouten in de PHP pagina getoond worden in de browser. Indien deze waarde op off staat zal er bij fouten enkel een witte pagina getoond worden. De waarde 'on' is dus enkel nuttig voor ontwikkelomgevingen. In productie staat deze waarde op 'off'
+
+**AANDACHT:** Elke wijziging in php.ini zorgt er voor dat de Apache server moet herstart worden (zie [Apache](#apache)).
+
+Hiermee zit de installatie en configuratie voor PHP er op.
