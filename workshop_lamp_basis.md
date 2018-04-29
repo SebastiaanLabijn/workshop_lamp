@@ -66,7 +66,7 @@ extra accounts gebruikt (zie **Workshop LAMP expert** voor zo een aanpak)
 
 ![Logo Arch Linux](./afb/arch_logo.png)
 
-Als Linux distributie kiezen we voor [**Arch Linux**] (https://www.archlinux.org/).
+Als Linux distributie kiezen we voor [**Arch Linux**](https://www.archlinux.org/).
  Deze wordt wegens *bleeding-edge* niet aangeraden voor server installaties maar
  we gebruiken deze omdat we ook de installatiestappen van Linux zelf willen bestuderen.
  Ook wordt deze distributie standaard geïnstalleerd zonder GUI. Download [hier] 
