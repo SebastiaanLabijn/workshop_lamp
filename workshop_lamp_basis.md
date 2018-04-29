@@ -12,10 +12,9 @@ author: ing. Sebastiaan Labijn
 5. [PHP](#php)
 6. [Apache](#apache)
 7. [Uitbreidingen](#uitbreidingen)
-	* phpMyAdmin
-	* SSH
-	* SFTP server
-	* VirtualBox GuestAdditions
+	* [phpMyAdmin](#phpmyadmin)
+	* [FTP server](#ftp-server)
+	* [VirtualBox GuestAdditions](#virtualbox-guestadditions)
 	* Synchronisatie bestanden server via gedeelde map
 
 # Inleiding
@@ -694,7 +693,7 @@ Alias /phpmyadmin "/usr/share/webapps/phpMyAdmin"
 </Directory>
 ```
 
-Dit zal er voorzorgen dat we via http://192.168.56.56/phpmyadmin de applicatie kunnen bereiken dankzij de alias die we gedefinieerd hebben. Alvorens dit zo is moeten we uiteraard eerst onze **httpd** service.
+Dit zal er voorzorgen dat we via http://192.168.56.56/phpmyadmin de applicatie kunnen bereiken dankzij de alias die we gedefinieerd hebben. Alvorens dit zo is moeten we uiteraard eerst onze **httpd** service herstarten
 
 ```bash
 [root@virtualbox ~]# systemctl restart httpd
@@ -705,40 +704,48 @@ Bij syntax fouten in het configuratiebestand zal de service niet goed gestart zi
 
 ![Aanmelden phpMyAdmin](./afb/phpmyadmin_login.png)
 
-Probeer op deze startpagina als root in te loggen met uw **mysql wachtwoord**.Na aanmelden krijgt u volgend dashboard te zien
+Probeer op deze startpagina als root in te loggen met uw **mysql wachtwoord**. Na aanmelden krijgt u volgend dashboard te zien
  
 ![Dashboard phpmyadmin](./afb/phpmyadmin_dashboard.png)
 
 Hierdoor is de installatie van **phpMyAdmin** geslaagd. Links in de boomstructuur kan u de aangemaakte database test terugvinden. Als u deze openklapt kan u de tabel user terugvinden en eventueel aanpassen.
 
-#####
+## FTP server
 
-FTP server
+Momenteel maken we de bestanden onze server manueel aan en wordt ook op de server zelf de inhoud via **vi** of **nano** toegevoegd. Dit is echter zeer omslachting. Om bestanden van uit onze host te kunnen opladen naar onze server gaan we een **FTP** service opzetten met **bftpd** (Voor **SFTP** en **SSH** zie de "Workshop LAMP Expert").
 
-Aangezien we momenteel de bestanden op onze server geplaatst hebben door ze daar aan te maken en dan de inhoud er in te plaatsen is het veel gemakkelijker om via een FTP verbinden de bestanden van de host te kunnen opladen. Wij gaan een server hosten met bftpd.
+### Installatie
 
-Installatie
+Indien nodig log je als root in de virtualbox in. Voer de installatie uit met het commando
 
-Indien nog log je als root in de virtualbox in. Voer de installatie uit met het commando
-pacman -S bftpd
+```bash
+[root@virtualbox ~]# pacman -S bftpd
+```
 
-Configuratie
+### Configuratie
 
-Configuratie van dit programma verloopt via het bestand /etc/bftpd.conf. Open dit bestand in vi of nano. Ga helemaal naar onder en pas de tekst voor user root aan naar:
+De configuratie van **bftpd** verloopt via het bestand **/etc/bftpd.conf**. Open dit bestand en ga helemaal naar onder. Pas daar de tekst voor user root aan als volgt:
+
+```bash
 user root {
-ROOTDIR="/srv/http"
+	ROOTDIR="/srv/http"
 }
+```
 
-Aangezien FTP een service is moeten we deze dus opnieuw activeren en starten:
-systemctl enable bftpd
-systemctl start bftpd
+Aangezien **FTP** een service is moeten we deze dus opnieuw activeren en starten:
 
-Gebruikt nu een ftp-client op de host, b.v.: filezilla, en maak een verbinding als root user. U kan ook in de browser surfen naar ftp://192.168.56.56 en log daarna in als root. In beide gevallen zal u de hoofdmap van onze website zien met daarin de 2 php bestanden:
+```bash
+[root@virtualbox ~]# systemctl enable bftpd
+[root@virtualbox ~]# systemctl start bftpd
+```
 
-Bestanden naar de map van de website op de server verplaatsen is wel enkel mogelijk met een ftp-client.
+Gebruikt nu een ftp-client op de host, b.v.: **FileZilla**, en maak een verbinding als root user. U kan ook in de browser surfen naar ftp://192.168.56.56 en aanmelden als root. In beide gevallen zal u de hoofdmap van onze website zien met daarin de eerder aangemaakte php bestanden:
+ 
+![Index ftp server](./afb/ftp_index.png)
 
+Indien u iets anders wil dan een bestand downloaden, b.v.: naam wijzigen, bestand opladen, dan is dat enkel mogelijk met een ftp-client.
 
-VirtualBox GuestAdditions
+# VirtualBox GuestAdditions
 
 Het installeren van de guestadditions zal ons toelaten een paar extra zaken te gebruiken zoals onder andere gedeelde mappen en gedeeld klembord. Dit kan handig zijn om tekst vanuit een host te kunnen plakken in de guest.
 
