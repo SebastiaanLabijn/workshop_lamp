@@ -9,7 +9,7 @@ author: ing. Sebastiaan Labijn
 2. Voorbereiding
 	* Linux distributie downloaden
 	* Aanmaken nieuwe virtuele machine
-3. [Arch Linux](#Arch-Linux)
+3. [Arch Linux](#arch-linux)
 	* Voorbereiding
 	* Toestenbordindeling instellen
 	* Controleren of we met het internet verbonden zijn
