@@ -526,7 +526,7 @@ Hiermee zit de installatie en configuratie voor PHP er op.
 
 Als laatste stap om onze **LAMP** stack te vervolledigen gaan **Apache** installeren. Hierop zullen wij dan een webapplicatie draaien bestaande uit twee eenvoudige PHP pagina's om aan te tonen dat PHP effectief draait en we data uit onze testdatabank kunnen ophalen.
 
-# Installatie
+## Installatie
 
 Om Apache te installeren loggen we, indien nodig, eerst in onze distribute in als root. We installeren naast **Apache** ook al onmiddellijk de uitbreiding voor PHP mee. Na inloggen voeren we in de commandprompt het volgende uit.
 
@@ -588,7 +588,7 @@ Zoek nu naar de regels:
 
 Voer na index.html ook de tekst index.php toe.
 
-Ga nu helemaal naar onder in het bestand en voeg volgende regels toe voor php:
+Ga nu helemaal naar onder in het bestand en voeg volgende regels toe specifiek voor **PHP 7**:
 
 ```bash
 # PHP 7
@@ -601,13 +601,13 @@ Controleer steeds na het herstarten van een service zijn status!
 
 ## Testpagina's toevoegen
 
-Als laatste stap gaan we nu twee pagina's toevoegen op onze website. Zoals uit vorige paragraaf bleek moeten we deze bestanden aan de **/srv/http** map toevoegen. Voor volgend command uit om de index pagina te testen waarin we onze php informatie weergeven:
+Als laatste stap gaan we nu twee pagina's toevoegen op onze website. Zoals uit vorige paragraaf bleek moeten we deze bestanden aan de **/srv/http** map toevoegen. Voer volgend command uit om de pagina **index.php** aan te maken waarin we de detaisl van onze PHP installatie weergeven.
 
 ```bash
 [root@virtualbox ~]# echo "<?php phpinfo(); ?>" > /srv/http/index.php
 ```
 
-Open nu op de host jouw browser opnieuw en surf naar http://192.168.56.56/ Indien alles gelukt is ziet u de informatie pagina van php zoals hieronder
+Open nu op de host jouw browser opnieuw en surf naar http://192.168.56.56/ Indien alles gelukt is ziet u de informatie pagina van PHP zoals hieronder
 
 ![PHP overzichtpagina Apache](./afb/apache_php.png)
 
@@ -621,7 +621,6 @@ $DB_port = "3306";
 $DB_user = "root";
 $DB_password = "VUL DIT AAN MET JOUW WACHTWOORD";
 $DB_name = "test";
-
 
 // Proberen om een databank connectie op te zetten
 try
@@ -659,3 +658,156 @@ Dit betekent dat we onze MySQL databank kunnen aanspreken vanuit PHP op onze Apa
 **EXTRA:** om niet altijd bestanden manueel te moeten typen op onze server kiezen we uiteraard voor een gemakkelijkere manier. Enerzijds kan je een **FTP** server (of **SFTP**) opzetten zodat je met een FTP-client vanop de host bestanden kan opladen naar de map van de webserver. Anderzijds kan je ook een script uitvoeren die automatisch alle gewijzigde bestanden uit een gedeelde map op de host kopieert naar de map van de website op de server. Beide oplossingen zijn beschreven in [Uitbreidingen](#uitbreidingen).
 
 # Uitbreidingen
+
+## phpMyAdmin
+
+Om het beheer van de databank te vergemakkelijken en dus zo het gebruik van **MySQL** prompt zoveel mogelijk te vermijden zullen we gebruik maken van het pakket **phpMyAdmin**. Dit zal ons in staat stellen om via een browser op de host omgeving de databank aan te spreken in de virtualbox en deze te beheren.
+
+### Installatie
+
+Indien nodig log je als root in de virtuele machine in. Voer de installatie uit met het commando
+
+```bash
+[root@virtualbox ~]# pacman -S phpmyadmin
+```
+
+Aangezien deze uitbreiding, zoals de naam al aangeeft, gebruik zal maken van PHP moeten we ook de extensie activeren om met **mysqli** te werken. Open het bestand **/etc/php/php.ini** in **vi** of **nano** en zoek naar de regel **;extension=mysli** en verwijder de ; op het begin van deze regel.
+
+### Configuratie
+
+Nu de extensie ingeschakeld is moeten we ook in **Apache** een directory toevoegen die verwijst naar de **phpMyAdmin** bestanden. Om dit te doen openen we het bestand **/etc/httpd/conf/httpd.conf** in **vi** of **nano**. Zoek naar de **Include** regel van PHP7 (zie [PHP](#php)) en voeg daaronder volgende regels toe:
+
+```bash
+# phpMyAdmin
+Include conf/extra/phpmyadmin.conf
+```
+
+Aangezien dit bestand **/etc/httpd/conf/extra/phpmyadmin.conf** nog niet bestaat gaan we dit nu aanmaken. Open nadien het bestand met **vi** of **nano** en voeg volgende inhoud toe:
+
+```bash
+Alias /phpmyadmin "/usr/share/webapps/phpMyAdmin"
+<Directory "/usr/share/webapps/phpMyAdmin">
+    DirectoryIndex index.php
+    AllowOverride All
+    Options FollowSymlinks
+    Require all granted
+</Directory>
+```
+
+Dit zal er voorzorgen dat we via http://192.168.56.56/phpmyadmin de applicatie kunnen bereiken dankzij de alias die we gedefinieerd hebben. Alvorens dit zo is moeten we uiteraard eerst onze **httpd** service.
+
+```bash
+[root@virtualbox ~]# systemctl restart httpd
+[root@virtualbox ~]# systemctl status httpd
+```
+
+Bij syntax fouten in het configuratiebestand zal de service niet goed gestart zijn! Indien het lukt om te pagina te laden krijgt u onderstaand scherm te zien:
+
+![Aanmelden phpMyAdmin](./afb/phpmyadmin_login.png)
+
+Probeer op deze startpagina als root in te loggen met uw **mysql wachtwoord**.Na aanmelden krijgt u volgend dashboard te zien
+ 
+![Dashboard phpmyadmin](./afb/phpmyadmin_dashboard.png)
+
+Hierdoor is de installatie van **phpMyAdmin** geslaagd. Links in de boomstructuur kan u de aangemaakte database test terugvinden. Als u deze openklapt kan u de tabel user terugvinden en eventueel aanpassen.
+
+#####
+
+FTP server
+
+Aangezien we momenteel de bestanden op onze server geplaatst hebben door ze daar aan te maken en dan de inhoud er in te plaatsen is het veel gemakkelijker om via een FTP verbinden de bestanden van de host te kunnen opladen. Wij gaan een server hosten met bftpd.
+
+Installatie
+
+Indien nog log je als root in de virtualbox in. Voer de installatie uit met het commando
+pacman -S bftpd
+
+Configuratie
+
+Configuratie van dit programma verloopt via het bestand /etc/bftpd.conf. Open dit bestand in vi of nano. Ga helemaal naar onder en pas de tekst voor user root aan naar:
+user root {
+ROOTDIR="/srv/http"
+}
+
+Aangezien FTP een service is moeten we deze dus opnieuw activeren en starten:
+systemctl enable bftpd
+systemctl start bftpd
+
+Gebruikt nu een ftp-client op de host, b.v.: filezilla, en maak een verbinding als root user. U kan ook in de browser surfen naar ftp://192.168.56.56 en log daarna in als root. In beide gevallen zal u de hoofdmap van onze website zien met daarin de 2 php bestanden:
+
+Bestanden naar de map van de website op de server verplaatsen is wel enkel mogelijk met een ftp-client.
+
+
+VirtualBox GuestAdditions
+
+Het installeren van de guestadditions zal ons toelaten een paar extra zaken te gebruiken zoals onder andere gedeelde mappen en gedeeld klembord. Dit kan handig zijn om tekst vanuit een host te kunnen plakken in de guest.
+
+Installatie
+
+Indien nodig, log in als root. Voer in de commandprompt het volgende uit:
+pacman -S virtualbox-guest-modules-arch
+pacman -S virtualbox-guest-utils
+
+Dit is opnieuw een service en moet dus geactiveerd en gestart worden na installatie:
+systemctl enable vboxservice
+systemctl start vboxservice
+
+Gedeelde map
+
+Indien u een gedeelde map wil gebruiken moet u nu eerst de virtuele machine afsluiten (shutdown -h now). Open de instellingen van de server en ga naar shared folders. Voeg hier een nieuwe map toe die je wil delen. Zorg er zeker voor dat de optie auto-mount aangevinkt werd en dat de naam GEEN spaties bevat. Start nu de machine opnieuw op en log in als root. In de map /media zou nu een map moeten zien met als naam sf_<naam uw map>
+
+Synchronisatie bestanden server via gedeelde map
+
+Om het manuele werk dat we moeten doen via FTP door telkens de bestanden op te laten te vergemakkelijken zullen we bestanden uit een bepaalde map op de host automatisch synchroniseren naar de website map op de server. 
+
+LET OP: als u deze methode toepast wordt het effectief van de FTP server teniet gedaan, want opgeladen bestanden zullen direct verwijdert worden door de synchronisatie!
+
+AANDACHT: dit deel gaat er vanuit dat u de VirtualBox GuestAdditions al heeft geïnstalleerd (zie hoger) en een gedeelde map heeft aangemaakt.
+
+Configuratie
+
+Het script dat automatisch zal syncroniseren is een systeemservice. We gaan dus een eigen service schrijven en deze toevoegen. 
+
+
+De synchronisatie zelf gebeurd via rsync. Dit pakket is niet standaard meegeleverd dus dit zullen we eerst installeren pacman -S rsync.
+
+Eerst maken we het script aan met de code tot synchronisate. Maak een bestand sync.sh aan in de map /root en plaats volgende code in het bestand:
+#!/bin/bash
+# De mappen
+sf="/media/PLAATS HIER DE NAAM VAN JOUW MAP/"
+wf="/srv/http"
+# Synchronisatie uitvoeren (verborgen bestanden niet mee syncen)
+rsync -az --quiet --no-perms --delete --exclude ".*" "$sf" "$wf"
+
+Zorg er voor dat dit bestand uitvoerbaar is voor root en group via chmod 770 sync.sh. Voer nu het commando cp /srv/http/* /media/sf_<naam gedeelde map> uit. Dit zorgt er voor dat de bestanden van de website eerst naar de gedeelde map worden gekopieerd. Anders was je deze kwijt door synchronisatie daar ze nog niet op de host aanwezig zijn. Je kan dit script nu testen op zijn werking door ./sync.sh uit te voeren. Plaats een leeg bestand in de gedeelde map op de host en controleer in de guest of het bestand werd overgezet. Dit kan bijvoorbeeld door het tree commando uit te voeren. Dit is een heel handig commando dat een boomstructuur van een map toont. Dit is opnieuw niet standaard geïnstalleerd dus voer eerst pacman -S tree uit. Nadien voer je tree /srv/http uit.
+
+
+Het script werkt maar het nadeel is nu dat de synchronisatie nog altijd manueel moet geactiveerd worden. Om dit op te lossen gaan we nu een service aanmaken dit het script voor ons elke 5 seconden zal oproepen. Maak een bestand websitesync.service aan in de map /usr/lib/systemd/system en plaats daarin volgende inhoud:
+[Unit]
+Description=Sync Website
+
+[Service]
+ExecStart=/root/sync.sh
+Restart=always
+# Synchronisatie elke 10 seconden uitvoeren
+RestartSec=10
+
+[Install]
+Alias=websitesync.service
+WantedBy=multi-user.target
+
+
+Sla het bestand op en controleer of het system de service kan laden met
+systemctl list-unit-files | grep website
+
+
+Het enige wat nu nog rest is de service effectief te activeren en te starten volgens
+systemctl enable  websitesync.service
+systemctl start  websitesync.service
+
+Plaats nu nog enkele bestanden op de host in de gedeelde map en controleer of deze ook op de server er bij komen.
+
+Herstart ook even de virtuele machine en controleer de status van de service na reboot. Deze zou nog altijd moeten actief zijn.
+
+Om de status van een service constant, in ons voorbeeld om de halve seconde, te monitoren kan u gebruik maken van 
+watch –n 0.5 systemctl status  websitesync.service
