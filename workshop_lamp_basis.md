@@ -8,33 +8,10 @@ author: ing. Sebastiaan Labijn
 1. [Inleiding](#inleiding)
 2. [Voorbereiding](#voorbereiding)
 	* Linux distributie downloaden
-	* Aanmaken nieuwe virtuele machine
 3. [Arch Linux](#arch-linux)
-	* Voorbereiding
-	* Toestenbordindeling instellen
-	* Controleren of we met het internet verbonden zijn
-	* Klok goed zetten
-	* Harde schijf voorbereiden
-	* Installeren basis ArchLinux
-	* Fstab genereren
-	* Tijdzone instellen
-	* Taal & Regio instellen
-	* Initramfs
-	* Wachtwoord instellen
-	* Hostname instellen
-	* Bootloader
-	* Netwerk instellen
 4. [MariaDB](#mariadb)
-	* Installatie
-	* Configuratie
-	* Testdatabank aanmaken
 5. [PHP](#php)
-	* Installatie
-	* Configuratie
 6. [Apache](#apache)
-	* Installatie
-	* Configuratie
-	* Testpagina's toevoegen
 7. [Uitbreidingen](#uitbreidingen)
 	* phpMyAdmin
 	* SSH
@@ -50,13 +27,13 @@ LAMP staat voor Linux – Apache – MariaDB – PHP. Deze vier technologieën g
 stap voor stap installeren en configureren. Als einddoel hebben we dan een simpele
 webserver opgezet in een virtuele omgeving.
 
-Afspraken doorheen deze handleiding:
+Afspraken doorheen deze workshop:
     
 * namen van pakketten en belangrijke termen zijn weergegeven in het **vet**
 * commando’s zijn weergeven in een kader met voorafgaande command prompt
 * acties/selecties/muisklikken worden geplaatst tussen ' '
 * toetsenaanslagen worden geplaatst tussen " ", b.v.:&nbsp;"ctrl + c"
-* (deel)inhoud van bestanden is in blauw afgedrukt of met syntaxcoloring
+* (deel)inhoud van bestanden is in een kader afgedrukt (indien mogelijk met syntaxcoloring)
 * voor de eenvoud wordt alles met user **root** uitgewerkt. Er worden dus geen 
 extra accounts gebruikt (zie **Workshop LAMP expert** voor zo een aanpak)
 
@@ -159,7 +136,7 @@ U zou een uitvoer gelijkaardig aan onderstaande schermafbeelding moeten krijgen:
 
 ![Uitvoer fdisk -l](./afb/fdisk.png)
 
-In deze handleiding gaan we verder uit van **/dev/sda** als primaire harde schijf.
+In deze workshop gaan we verder uit van **/dev/sda** als primaire harde schijf.
 Pas in de commando's dus **sda** aan indien u een andere letter heeft voor jouw 
 harde schijf. Om effectief een partitie op onze schijf aan te maken gaan we met **fdisk** aan de 
 slag gaan.   
@@ -204,7 +181,8 @@ aangemaakt.
 ![fdisk wijzigingen wegschrijven](./afb/fdisk_sync.png)
 
 We hebben nu wel een opstartbare harde schijf aangemaakt met een partitie maar 
-deze beschikt nog niet over een bestandssysteem. In deze handleiding gaan we 
+deze beschikt nog niet over een bestandssysteem. In deze workshopIndien je een GUI installeert ook in die shell kleuren wilt, voert u ook volgend commando uit 
+echo “alias ‘ls’=’ls --color=always’” >> ~/.bashrc gaan we 
 gebruik maken van het **fourth extended file system** ofwel **ext4**. Dit is de 
 standaard bestandsindeling voor huidige Linuxdistributies. Via volgend commando 
 wordt onze partitie geformatteerd naar ext4
@@ -307,4 +285,150 @@ Het toetsenbord in de console op azerty instellen doen we als volgt:
 ```
 
 **Opmerking:** op een professionele server zal de taal altijd ingesteld zijn als en_GB.UTF-8 of en_US.UTF-8
+
+## Initramfs
+
+Nu gaan we de bestanden genereren die toelaten dat linux geboot kan worden, de **initial ramdisk** bestanden.
+
+```bash
+[root@archiso /]# mkinitcpio -p linux
+```
+
+Tijdens het genereren krijgt u een uitvoer gelijkaardig aan onderstaande afbeelding. U zal een waarschuwing krijgen dat firmware **aic94xx** en **wd719x** ontbreken. Deze zijn te negeren (zie Expert versie om deze waarschuwingen weg te werken).
+
+![Initramfs](./afb/initramfs.png)
+
+## Wachtwoord instellen
+
+Bij een nieuwe installatie moet ook het wachtwoord voor **root** ingesteld worden. Zorg er voor dat u dit gemakkelijk kan onthouden!
+
+```bash
+[root@archiso /]# passwd
+```
+
+## Hostname instellen
+
+Om er voor te zorgen dat ons netwerk IP-adressen op een juiste manier omzet gaan we een **hostname** instellen. Hiervoor moeten we de bestanden **/etc/hostname** en **/etc/hosts** aanpassen. Indien een andere waarde dan **virtualbox** wil dan vervangt u deze waar nodig.
+
+```bash
+[root@archiso /]# echo "virtualbox" > /etc/hostname
+```
+
+Open het bestand **/etc/hosts** met **vi** of **nano** en voeg volgende regels toe:
+
+```bash
+127.0.0.1	localhost
+::1		localhost
+127.0.1.1	virtualbox.localdomain	virtualbox
+```
+
+## Bootloader
+
+Als laatste stap om de installatie af te ronden moeten we ook een bootloader installeren. Deze zorgt voor de verbinding tussen de **BIOS** en de **initramfs**. Zo krijgen we een menu te zien waaruit we kunnen kiezen welk besturingssysteem we starten. Zonder deze bootloader zal de BIOS geen besturingssysteem vinden om te laden! Wij gaan hiervoor gebruik maken van **grub**. Deze wordt niet standaard mee geïnstalleerd dus dit doen we als volgt:
+
+```bash
+[root@archiso /]# pacman -S grub os-prober
+```
+
+**Pacman** is de package manager in Arch Linux. Nu is enkel nog maar het pakket **grub** in Arch Linux geïnstalleerd. We moeten er ook voor zorgen dat de code op onze bootbare harde schijf wordt geplaatst om onze initramfs bestanden te vinden. Hiervoor moeten we grub installeren op de bootbare partitie (/dev/sda1) en nadien configureren. Dit doen we als volgt:
+
+```bash
+[root@archiso /]# grub-install /dev/sda
+[root@archiso /]# grub-mkconfig -o /boot/grub/grub.cfg
+```
+
+Indien de installtie gelukt is kan u de chroot omgeving verlaten met **exit**. Nadien gaan we ook onze harde schijf ontmounten en de virtuele machine afsluiten.
+
+```bash
+root@archiso ~ # umount -R /mnt
+root@archiso ~ # shutdown -h now
+```
+
+Verwijder nu het ISO-bestand van de installatie uit de virtuele cd-rom en start de virtuele machine op. Als alles goed gaat komt u op onderstaand menu terecht
+
+![Grub Bootmenu](./afb/grub_boot.png)
+
+Selecteer de eerste optie 'Arch Linux, with Linux core repo kernel' en als alles goed gaat start Arch Linux volledig op. Nadien krijgt u het aanmeldscherm te zien. Hier kan u als root inloggen. Mocht u toch het Arch Linux boot scherm krijgen, dan heeft u het ISO-bestand nog niet verwijdert. Indien dat zo is selecteert u de optie 'Boot existing OS' en dan zou u wel het bovenstaande scherm moeten krijgen.
+
+**Hierdoor is de installatie van Linux geslaagd MAAR hebben we nog geen netwerk …!**
+
+Netwerk instellen
+
+Via het commando **ip link** krijgen we een overzicht van beschikbare netwerk adapters in ons systeem.
+
+![ip link](./afb/ip_link.png)
+
+Onze twee netwerkkaarten zijn down (De namen **enp0s3** en **enp0s8** kunnen verschillen!). Dit komt omdat er nog geen service geactiveerd is die ip's uitdeelt, namelijk **dhcpcd**. We moeten deze service dus eerst activeren en opstarten. Vanaf dan zullen bij elke opstart van het systeem onze netwerkkaarten automatisch een ip ontvangen. 
+
+```bash
+[root@virtualbox ~]# systemctl enable dhcpcd
+[root@virtualbox ~]# systemctl start dhcpcd
+```
+
+Algemeen kan u steeds volgende commandos's gebruiken bij een systeemservice. Indien u deze commando's niet als root uitvoerd moet u deze steeds via **sudo** uitvoeren!
+
+```bash
+# Service activeren
+systemctl enable <naam service>
+# Service starten
+systemctl start <naam service>
+# Status opvrangen van een service
+systemctl status <naam service>
+# Stoppen van een service
+systemctl stop <naam service>
+```
+
+Via het commando **ip link** kan u nu controleren of de state UP is voor **enp0s3** en **enp0s8**. U controleert ook best de status van de service **dhcpcd**
+
+![Status dhcpcd](./afb/dhcpcd_status.png)
+
+Herhaal nu ook de commando's, zoals we bij de voorbereiding gedaan hebben, om te controleren of we effectief toegang hebben tot het internet
+
+```bash
+[root@virtualbox ~]# ping www.google.be
+[root@virtualbox ~]# curl icanhazip.com
+```
+
+Aangezien we de **host-only** adapter gebruiken om vanuit ons host besturingssysteem de guest te benaderen, zullen we deze een statisch ip geven. Zo kunnen we telkens eenzelfde ip gebruiken in de host browser om de website te testen. Het statische ip, hier **192.168.56.56**, stellen we in op **enp0s8**. Pas in onderstaand commando **enp0s8** indien uw 2de netwerkkaart een andere naam had.
+
+```bash
+[root@virtualbox ~]# ip addr add 192.168.56.56/24 broadcast 192.168.56.255 dev enp0s8
+```
+
+Open nu in je host besturingssysteem een terminal/command prompt en voer **ping 192.168.56.56** uit. Indien dit lukt is je guest nog steeds bereikbaar en is de netwerkconfiguratie ook afgerond!
+
+Het nadeel van deze methode is dat de configuratie van het statische ip adres verloren gaat bij afsluiten van de machine. We zouden deze stap dus bij elke boot moeten herhalen, wat heel omslachtig is! 
+
+Om dit op te vangen gaan we een configuratiebestand aanmaken waar de details voor **enp0s8** in opgeslagen zitten zodat het statische ip bij elke boot geladen wordt. Open hiervoor het bestand **/etc/dhcpd.conf** met **vi** of **nano** en voeg onderaan volgende inhoud toe:
+
+```bash
+interface=enp0s8
+static ip_address='192.168.56.56/24'
+static routers='192.168.56.1'
+```
+
+Sla de wijzigingen op in het bestand. Herstart nu de machine (**reboot**) en voer na inloggen het commando **ip a** uit. Je zou nog altijd 192.168.56.56/24 moeten zien bij enp0s8 en state UP.
+
+![ip a](./afb/ip_a.png)
+
+**TIP:** om na inloggen een overzicht te krijgen van alle ingeladen services gebruik je
+
+```bash
+[root@virtualbox ~]# systemctl --type=service
+```
+
+**EXTRA:** om in je shell telkens kleuren te krijgen bij de uitvoer van ls, volstaat het om volgend commando uit te voeren en nadien opnieuw in te loggen. Dit commando zorgt er voor dat er een **alias** aangemaakt wordt en de standaard uitvoer van **ls** aangepast wordt met syntaxcoloring en in jouw bashprofiel wordt geplaatst.
+
+```bash
+[root@virtualbox ~]# echo "alias 'ls'='ls --color=always'" >> ~/.bash_profile
+```
+
+![alias ls](./afb/alias_ls.png)
+
+Indien je een GUI installeert (komt niet aan bod in deze workshop) en ook in die shell kleuren wilt dan voer je ook onderstaande  command uit.
+
+```bash
+[root@virtualbox ~]# echo "alias 'ls'='ls --color=always'" >> ~/.bashrc
+```
+Hiermee is de installatie van Arch Linux volledig en kunnen we beginnen met het toevoegen van onze server functionatiteiten.
 
