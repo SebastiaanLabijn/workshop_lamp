@@ -30,7 +30,7 @@ webserver opgezet in een virtuele omgeving.
 Afspraken doorheen deze workshop:
     
 * namen van pakketten en belangrijke termen zijn weergegeven in het **vet**
-* commando’s zijn weergeven in een kader met voorafgaande command prompt
+* commando’s zijn weergeven in een kader met voorafgaande command prompt of in-line in **vet**
 * acties/selecties/muisklikken worden geplaatst tussen ' '
 * toetsenaanslagen worden geplaatst tussen " ", b.v.:&nbsp;"ctrl + c"
 * (deel)inhoud van bestanden is in een kader afgedrukt (indien mogelijk met syntaxcoloring)
@@ -430,5 +430,73 @@ Indien je een GUI installeert (komt niet aan bod in deze workshop) en ook in die
 ```bash
 [root@virtualbox ~]# echo "alias 'ls'='ls --color=always'" >> ~/.bashrc
 ```
+
 Hiermee is de installatie van Arch Linux volledig en kunnen we beginnen met het toevoegen van onze server functionatiteiten.
 
+# MariaDB 
+
+Aangezien onze webserver een **PHP** applicatie zal draaien die een databank (**MySQL**) gebruikt zullen we eerst de databank installeren en configureren, nadien volgt PHP.
+
+## Installatie
+
+Om **MariaDB** te installeren loggen we, indien nodig, eerst in onze distribute in als **root**. Na inloggen voeren we de installatie uit met onderstaande commando.
+
+```bash
+[root@virtualbox ~]# pacman -S mariadb
+```
+
+Nu MariaDB geïnstalleerd is moeten we ook de mappen aanmaken waarin onze databank zijn data zal opslaan. 
+
+```bash
+[root@virtualbox ~]# mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+```
+
+Net zoals bij een nieuwe Linux installatie het geval was, is ook bij MySQL het wachtwoord na installatie leeg. Dit moet dus eerst ingesteld worden maar dit is enkel mogelijk als **MariaDB** zelf draait. We hebben op dit moment enkel de installatie gedaan maar net zoals bij **dhcpcd** het geval was draait de service nog niet.
+
+```bash
+[root@virtualbox ~]# systemctl enable mariadb
+[root@virtualbox ~]# systemctl start mariadb
+```
+
+Controleer of het starten effectief gelukt is èn de service MariaDB correct draait. 
+
+```bash
+[root@virtualbox ~]# systemctl status mariadb
+```
+
+![Status MariaDB](./afb/mariadb_status.png)
+
+## Configuratie
+
+Nu onze service draait kunnen we dus ook het wachtwoord voor de mysql rootgebruiker aanpassen. Voer hiervoor **mysql_secure_installtion** uit. Het huidige wachtwoord is leeg dus duw bij de eerste vraag op "enter". Antwoord nadien op elke vraag met "Y" en voer indien gevraagd het gewenste nieuwe wachtwoord in.
+
+## Testdatabank aanmaken
+
+Nu de configuratie van MariaDB zelf voltooid is kunnen we onze databank aanmaken die we zullen gebruiken voor onze webapplicatie. Log hiervoor eerst in bij mysql met de user root met het commando **mysql -u root -p**
+Voer bij het wachtwoord dit van mysql in, het wachtwoord dat je in vorige paragraaf hebt ingesteld, EN NIET jouw eigen root wachtwoord! 
+
+Indien je succesvol aangemeld bent zal de prompt er uitzien als **MariaDB [(none)]**. Voer ondertaande commando's één voor één uit om de testdatabank aan te maken
+
+```sql
+MariaDB [(none)] create database test;
+MariaDB [(none)] use test;
+MariaDB [(test)] CREATE TABLE user (name VARCHAR(50) NOT NULL, PRIMARY KEY (name));
+MariaDB [(test)] insert into user values ('Jan');
+MariaDB [(test)] insert into user values ('Bert');
+MariaDB [(test)] insert into user values ('Pieter');
+MariaDB [(test)] insert into user values ('Tom');
+MariaDB [(test)] insert into user values ('Stijn');
+MariaDB [(test)] select * from user order by name;
+```
+
+Als u na het laatste commando onderstaande uitvoer krijgt is de testdatabank klaar:
+
+![Select MariaDB](./afb/mariadb_select.png)
+
+Verlaat mariadb via **exit** en u keert terug naar de rootprompt.
+
+Hiermee is de installatie en configuratie voor MariaDB klaar. 
+
+**AANDACHT:** in een professionele omgeving worden aparte gebruikers aangemaakt per databank. Hier wordt voor de gemakkelijkheid enkel de root user gebruikt.
+
+**EXTRA:** om niet altijd alle SQL queries via command prompt te moeten ingeven kan je ook het pakket **phpMyAdmin** installeren om via de browser op de host jouw databank te beheren (zie Uitbreidingen).
