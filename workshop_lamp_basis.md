@@ -15,7 +15,7 @@ author: ing. Sebastiaan Labijn
 	* [phpMyAdmin](#phpmyadmin)
 	* [FTP server](#ftp-server)
 	* [VirtualBox GuestAdditions](#virtualbox-guestadditions)
-	* Synchronisatie bestanden server via gedeelde map
+	* [Synchronisatie bestanden server via gedeelde map](#synchronisatie-bestanden-server-via-gedeelde-map)
 
 # Inleiding
 
@@ -739,57 +739,72 @@ Aangezien **FTP** een service is moeten we deze dus opnieuw activeren en starten
 [root@virtualbox ~]# systemctl start bftpd
 ```
 
-Gebruikt nu een ftp-client op de host, b.v.: **FileZilla**, en maak een verbinding als root user. U kan ook in de browser surfen naar ftp://192.168.56.56 en aanmelden als root. In beide gevallen zal u de hoofdmap van onze website zien met daarin de eerder aangemaakte php bestanden:
+Gebruikt nu een ftp-client op de host, b.v.: **FileZilla**, en maak een verbinding als root user. U kan ook in de browser surfen naar ftp://192.168.56.56 en aanmelden als root. In beide gevallen zal u de hoofdmap van onze website zien met daarin de eerder aangemaakte PHP bestanden:
  
 ![Index ftp server](./afb/ftp_index.png)
 
-Indien u iets anders wil dan een bestand downloaden, b.v.: naam wijzigen, bestand opladen, dan is dat enkel mogelijk met een ftp-client.
+Indien u iets anders wil dan een bestand downloaden, b.v.: naam wijzigen, bestand opladen, dan is dat enkel mogelijk door gebruik te maken van een FTP-client.
 
-# VirtualBox GuestAdditions
+## VirtualBox GuestAdditions
 
-Het installeren van de guestadditions zal ons toelaten een paar extra zaken te gebruiken zoals onder andere gedeelde mappen en gedeeld klembord. Dit kan handig zijn om tekst vanuit een host te kunnen plakken in de guest.
+Het installeren van de **GuestAdditions** zal ons toelaten een paar extra zaken te gebruiken zoals onder andere gedeelde mappen en een gedeeld klembord. Dit kan handig zijn om tekst vanuit een host te kunnen plakken in de guest.
 
-Installatie
+### Installatie
 
-Indien nodig, log in als root. Voer in de commandprompt het volgende uit:
-pacman -S virtualbox-guest-modules-arch
-pacman -S virtualbox-guest-utils
+Indien nodig, log in als root. Voer daarna de installatie uit.
 
-Dit is opnieuw een service en moet dus geactiveerd en gestart worden na installatie:
-systemctl enable vboxservice
-systemctl start vboxservice
+```bash
+[root@virtualbox ~]# pacman -S virtualbox-guest-modules-arch
+[root@virtualbox ~]# pacman -S virtualbox-guest-utils
+[root@virtualbox ~]# systemctl enable vboxservice
+[root@virtualbox ~]# systemctl start vboxservice
+```
 
-Gedeelde map
+### Gedeelde map
 
-Indien u een gedeelde map wil gebruiken moet u nu eerst de virtuele machine afsluiten (shutdown -h now). Open de instellingen van de server en ga naar shared folders. Voeg hier een nieuwe map toe die je wil delen. Zorg er zeker voor dat de optie auto-mount aangevinkt werd en dat de naam GEEN spaties bevat. Start nu de machine opnieuw op en log in als root. In de map /media zou nu een map moeten zien met als naam sf_<naam uw map>
+Indien u een gedeelde map wil gebruiken moet u nu eerst de virtuele machine afsluiten (**shutdown -h now**). Open de instellingen van de server in VirtualBox en ga naar 'shared folders'. Voeg hier een nieuwe map toe die je wil delen. Zorg er zeker voor dat de optie auto-mount aangevinkt werd en dat de naam **GEEN** spaties bevat. Start nu de machine opnieuw op en log in als root. In de map **/media** zou nu een map moeten zien met als naam **sf_<naam gedeelde map>**
 
-Synchronisatie bestanden server via gedeelde map
+## Synchronisatie bestanden server via gedeelde map
 
-Om het manuele werk dat we moeten doen via FTP door telkens de bestanden op te laten te vergemakkelijken zullen we bestanden uit een bepaalde map op de host automatisch synchroniseren naar de website map op de server. 
+Om het manuele werk dat we moeten doen via **FTP** door telkens de bestanden op te laden te vergemakkelijken zullen we bestanden uit een bepaalde map op de host automatisch synchroniseren naar de website map op de server. 
 
-LET OP: als u deze methode toepast wordt het effectief van de FTP server teniet gedaan, want opgeladen bestanden zullen direct verwijdert worden door de synchronisatie!
+**LET OP:** als u deze methode toepast wordt het effect van de FTP server teniet gedaan, want alle rechtstreeks wijzigingen in **/srv/http** zullen ongedaan gemaakt worden door de synchronisatie!
 
-AANDACHT: dit deel gaat er vanuit dat u de VirtualBox GuestAdditions al heeft geïnstalleerd (zie hoger) en een gedeelde map heeft aangemaakt.
+**AANDACHT:** dit deel gaat er vanuit dat u de **VirtualBox GuestAdditions** al heeft geïnstalleerd (zie [VirtualBox GuestAdditions](#virtualbox-guestadditions)) en een gedeelde map heeft aangemaakt.
 
-Configuratie
+### Configuratie
 
-Het script dat automatisch zal syncroniseren is een systeemservice. We gaan dus een eigen service schrijven en deze toevoegen. 
+Het script dat automatisch zal synchroniseren zal draaien als een systeemservice. We gaan dus een eigen service schrijven en deze toevoegen. 
 
+De synchronisatie zelf gebeurd via rsync. Dit pakket is niet standaard meegeleverd dus dit zullen we eerst installeren.
 
-De synchronisatie zelf gebeurd via rsync. Dit pakket is niet standaard meegeleverd dus dit zullen we eerst installeren pacman -S rsync.
+```bash
+[root@virtualbox ~]# pacman -S rsync
+```
 
-Eerst maken we het script aan met de code tot synchronisate. Maak een bestand sync.sh aan in de map /root en plaats volgende code in het bestand:
+Eerst maken we het script aan met de code tot synchronisate. Maak een bestand **sync.sh** aan in de map **/root** en plaats volgende code in het bestand:
+
+```bash
 #!/bin/bash
-# De mappen
-sf="/media/PLAATS HIER DE NAAM VAN JOUW MAP/"
+# De mappen (sf = shared folder, wf = website folder)
+sf="/media/<PLAATS HIER DE NAAM VAN JOUW MAP>/"
 wf="/srv/http"
 # Synchronisatie uitvoeren (verborgen bestanden niet mee syncen)
 rsync -az --quiet --no-perms --delete --exclude ".*" "$sf" "$wf"
+```
 
-Zorg er voor dat dit bestand uitvoerbaar is voor root en group via chmod 770 sync.sh. Voer nu het commando cp /srv/http/* /media/sf_<naam gedeelde map> uit. Dit zorgt er voor dat de bestanden van de website eerst naar de gedeelde map worden gekopieerd. Anders was je deze kwijt door synchronisatie daar ze nog niet op de host aanwezig zijn. Je kan dit script nu testen op zijn werking door ./sync.sh uit te voeren. Plaats een leeg bestand in de gedeelde map op de host en controleer in de guest of het bestand werd overgezet. Dit kan bijvoorbeeld door het tree commando uit te voeren. Dit is een heel handig commando dat een boomstructuur van een map toont. Dit is opnieuw niet standaard geïnstalleerd dus voer eerst pacman -S tree uit. Nadien voer je tree /srv/http uit.
+Zorg er voor dat dit bestand **uitvoerbaar** is voor **root** en **group** via **chmod 770 sync.sh**. Voer nu het commando **cp /srv/http/&ast; /media/sf_<naam gedeelde map>** uit. Dit zorgt er voor dat de bestanden van de website eerst naar de gedeelde map worden gekopieerd. Anders was je deze kwijt door synchronisatie daar ze nog niet op de host aanwezig zijn. Je kan dit script nu testen op zijn werking door **./sync.sh** uit te voeren. Plaats een leeg bestand in de gedeelde map op de host en controleer in de guest of het bestand werd overgezet. Dit kan bijvoorbeeld door het **tree** commando uit te voeren. Dit is een heel handig commando dat een boomstructuur van een map toont. Dit is opnieuw niet standaard geïnstalleerd
+	
+```bash
+[root@virtualbox ~]# pacman -S tree
+[root@virtualbox ~]# tree /srv/http
+```
 
+![tree](./afb/tree.png)
 
-Het script werkt maar het nadeel is nu dat de synchronisatie nog altijd manueel moet geactiveerd worden. Om dit op te lossen gaan we nu een service aanmaken dit het script voor ons elke 5 seconden zal oproepen. Maak een bestand websitesync.service aan in de map /usr/lib/systemd/system en plaats daarin volgende inhoud:
+Het script werkt maar het nadeel is nu dat de synchronisatie nog altijd manueel moet geactiveerd worden. Om dit op te lossen gaan we nu een systeemservice aanmaken dit het script voor ons elke 5 seconden zal oproepen. Maak een bestand **websitesync.service** aan in de map **/usr/lib/systemd/system** met volgende inhoud:
+
+```bash
 [Unit]
 Description=Sync Website
 
@@ -802,19 +817,35 @@ RestartSec=10
 [Install]
 Alias=websitesync.service
 WantedBy=multi-user.target
-
+```
 
 Sla het bestand op en controleer of het system de service kan laden met
-systemctl list-unit-files | grep website
 
+```bash
+[root@virtualbox ~]# systemctl list-unit-files | grep website
+```
+
+![Systeemservice websitesync](./afb/websitesync.png)
 
 Het enige wat nu nog rest is de service effectief te activeren en te starten volgens
-systemctl enable  websitesync.service
-systemctl start  websitesync.service
+
+```bash
+[root@virtualbox ~]# systemctl enable websitesync.service
+[root@virtualbox ~]# systemctl start websitesync.service
+```
 
 Plaats nu nog enkele bestanden op de host in de gedeelde map en controleer of deze ook op de server er bij komen.
-
-Herstart ook even de virtuele machine en controleer de status van de service na reboot. Deze zou nog altijd moeten actief zijn.
+Herstart ook de virtuele machine en controleer de status van de service na reboot. Deze zou nog altijd moeten actief zijn.
 
 Om de status van een service constant, in ons voorbeeld om de halve seconde, te monitoren kan u gebruik maken van 
-watch –n 0.5 systemctl status  websitesync.service
+
+```bash
+[root@virtualbox ~]# watch –n 0.5 systemctl status  websitesync.service
+```
+Deze 'blokkeert' wel de terminal voor gebruikersinvoer, dus u kan de **watch** altijd onderbreken met "ctrl + c".
+
+**TIP:** voeg het commando van **watch** als alias toe aan .bash_rc om zo gemakkelijk nadien de synchronisatie te kunnen monitoren zonder altijd he volledige commando te moeten typen
+
+```bash
+[root@virtualbox ~]# echo alias watchsync="watch –n 0.5 systemctl status  websitesync.service" >> ~/.bash_rc
+```
