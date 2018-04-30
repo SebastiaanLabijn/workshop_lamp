@@ -15,6 +15,7 @@ author: ing. Sebastiaan Labijn
 7. [Uitbreidingen](#uitbreidingen)
 	* [phpMyAdmin](#phpmyadmin)
 	* [VirtualBox GuestAdditions](#virtualbox-guestadditions)
+	* [Ontbrekende firmware](#ontbrekende-firmware)
 
 # Inleiding
 
@@ -1013,3 +1014,29 @@ Indien nodig, log in als root. Voer daarna de installatie uit.
 ### Gedeelde map
 
 Indien u een gedeelde map wil gebruiken moet u nu eerst de virtuele machine afsluiten (**shutdown -h now**). Open de instellingen van de server in VirtualBox en ga naar 'shared folders'. Voeg hier een nieuwe map toe die je wil delen. Zorg er zeker voor dat de optie auto-mount aangevinkt werd en dat de naam **GEEN** spaties bevat. Start nu de machine opnieuw op en log in. In de map **/media** zou nu een map moeten zien met als naam **sf_<naam gedeelde map>**
+
+## Ontbrekende firmware
+
+Als laatste uitbreiding zullen we de waarschuwing bij het aanmaken van de initramfs wegwerken door de firmware voor **aic94xx** en **wd719x** te installeren.
+Download de tars met firmwares [hier](https://aur.archlinux.org/cgit/aur.git/snapshot/aic94xx-firmware.tar.gz) en [hier](https://aur.archlinux.org/cgit/aur.git/snapshot/wd719x-firmware.tar.gz).
+Upload deze tars nu naar jouw server en voer onderstaande instructies uit
+
+```bash
+[virtualbox@virtuallamp ~]$ tar xvf aic94xx-firmware.tar.gz
+[virtualbox@virtuallamp ~]$ cd aic94xx-firmware
+[virtualbox@virtuallamp ~]$ makepkg -i
+# lha is nodig voor wd719x-firmware, dus pakket installeren
+[virtualbox@virtuallamp ~]$ sudo pacman -S lha
+[virtualbox@virtuallamp ~]$ tar xvf wd719x-firmware.tar.gz
+[virtualbox@virtuallamp ~]$ cd wd719x-firmware
+[virtualbox@virtuallamp ~]$ makepkg -i
+[virtualbox@virtuallamp ~]$ sudo mkinitcpio -p linux
+```
+
+Als alles goed gaat zouden nu de waarschuwingen tijdens het genereren van de initramfs moeten verdwenen zijn.
+Indien het gelukt is kan u ook de tars de mappen van de tars in u homemap verwijderen.
+
+```bash
+[virtualbox@virtuallamp ~]$ rm *-firmware.tar.gz
+[virtualbox@virtuallamp ~]$ rm -rf *-firmware
+```
