@@ -8,8 +8,7 @@ author: ing. Sebastiaan Labijn
 1. [Inleiding](#inleiding)
 2. [Voorbereiding](#voorbereiding)
 3. [Arch Linux](#arch-linux)
-4. [SSH](#ssh)
-5. [SFTP](#sftp)
+4. [SSH en SFTP](#ssh-en-sftp)
 6. [MariaDB](#mariadb)
 7. [PHP](#php)
 8. [Apache](#apache)
@@ -580,7 +579,7 @@ Ga vervolgens op zoek naar de regel **#Banner none** en wijzig deze naar **Banne
 Als laatste wijziging voeg je onderaan in het bestand volgende regel toe:
 **AllowUsers virtualbox**. Deze zorgt er voor dat onze standaardgebruiker toegang
 krijgt om via SSH te verbinden met de virtuele machine. Bewaar nu de wijzigingen in het bestand
-en herstart de service *sshd**. Controleer de status!
+en herstart de service **sshd**. Controleer de status!
 
 Nu **SSH** correct is ingesteld gaan we proberen een verbinding te maken vanuit de host. 
 
@@ -618,10 +617,8 @@ dus geen aparte **FTP** server opzetten zoals in de basis workshop wel het geval
 ### Verbinden
 
 Om via **SFTP** te verbinden vanuit de host moeten we gebruik maken van een FTP-client.
-Wij kiezen voor [**FileZilla**](http://filezilla-project.org).
-
-Open het programma en ga naar 'File' -> 'Site Manager ...' of via "Ctrl + S". Voeg
-een 'New Site' toe en vul de gegevens aan.
+Wij kiezen voor [**FileZilla**](http://filezilla-project.org). Open het programma na installatie 
+en ga naar 'File' -> 'Site Manager ...' of via "Ctrl + S". Voeg een 'New Site' toe en vul de gegevens aan.
 
 ![FileZilla new site](./afb/filezilla_site.png)
 
