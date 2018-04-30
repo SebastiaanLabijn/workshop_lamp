@@ -232,7 +232,7 @@ standaard bestandsindeling voor huidige Linuxdistributies. Maar voor elke partit
 nu de bestandssystemen aan
 
 ```bash
-root@archiso ~ # mkfs.-t vfat /dev/sda1
+root@archiso ~ # mkfs -t vfat /dev/sda1
 root@archiso ~ # mkfs.ext4 /dev/sda2
 root@archiso ~ # mkfs.ext4 /dev/sda3
 root@archiso ~ # mkswap /dev/sda4
@@ -509,11 +509,12 @@ zullen door een **normale** gebruiker uitgevoerd worden in **sudo**. Dit zorgt v
 een betere beveiliging op het systeem omdat een gebruiker dan enkel zaken kan wijzigen
 indien dit effectief aangegeven wordt. Voer nu onderstaande commando's uit om de
 standaardgebruiker aan te maken, vervang de **virtualbox** door een eigen gebruikersnaam
-indien gewenst.
+indien gewenst. Ook deze gebruiker krijgt standaard coloring bij ls.
 
 ```bash
 [root@virtuallamp ~]# useradd -mG wheel virtualbox
 [root@virtuallamp ~]# passwd virtualbox
+[root@virtuallamp ~]# echo "alias 'ls'='ls --color=always'" >> /home/virtualbox/.bash_profile
 ```
 
 Het eerste commando zorgt er voor dat de user **virtualbox** wordt aangemaakt en zijn
@@ -673,6 +674,8 @@ Nu de configuratie van MariaDB zelf voltooid is kunnen we onze databank aanmaken
 Voer bij het wachtwoord dit van mysql in, het wachtwoord dat je in vorige paragraaf hebt ingesteld, EN NIET jouw eigen root wachtwoord! 
 
 Indien je succesvol aangemeld bent zal de prompt er uitzien als **MariaDB [(none)]**. Voer ondertaande commando's één voor één uit om de testdatabank aan te maken
+Het voordeel van nu verbonden te zijn via **SSH** is dat je tekst kan plakken in de command prompt. Zo hoeft u niet alles over te typen
+maar kan u via 'copy' en 'paste' (= rechter muis knop) de tekst overbrengen.
 
 ```sql
 MariaDB [(none)] create database test;
@@ -690,7 +693,7 @@ Als u na het laatste commando onderstaande uitvoer krijgt is de testdatabank kla
 
 ![Select MariaDB](./afb/mariadb_select.png)
 
-Verlaat mariadb via **exit** en u keert terug naar de rootprompt.
+Verlaat mariadb via **exit** en u keert terug naar de prompt van de standaardgebruiker.
 
 Hiermee is de installatie en configuratie voor MariaDB klaar. 
 
