@@ -1,5 +1,5 @@
 ---
-title: Workshop LAMP
+title: Workshop LAMP (Expert)
 author: ing. Sebastiaan Labijn
 ---
 
@@ -8,12 +8,13 @@ author: ing. Sebastiaan Labijn
 1. [Inleiding](#inleiding)
 2. [Voorbereiding](#voorbereiding)
 3. [Arch Linux](#arch-linux)
-4. [MariaDB](#mariadb)
-5. [PHP](#php)
-6. [Apache](#apache)
+4. [SSH](#ssh)
+5. [SFTP](#sftp)
+6. [MariaDB](#mariadb)
+7. [PHP](#php)
+8. [Apache](#apache)
 7. [Uitbreidingen](#uitbreidingen)
 	* [phpMyAdmin](#phpmyadmin)
-	* [FTP server](#ftp-server)
 	* [VirtualBox GuestAdditions](#virtualbox-guestadditions)
 	* [Synchronisatie bestanden server via gedeelde map](#synchronisatie-bestanden-server-via-gedeelde-map)
 
@@ -32,10 +33,12 @@ Afspraken doorheen deze workshop:
 * acties/selecties/muisklikken worden geplaatst tussen ' '
 * toetsenaanslagen worden geplaatst tussen " ", b.v.:&nbsp;"ctrl + c"
 * (deel)inhoud van bestanden is in een kader afgedrukt (indien mogelijk met syntaxcoloring)
-* voor de eenvoud wordt alles met user **root** uitgewerkt. Er worden dus geen 
-extra accounts gebruikt 
+* enkel de basis installatie wordt als root uitgevoerd. De configuratie nadien 
+gebeurt met een gebruiker met sudo rechten
 
-Voor een uitgebreidere workshop waarbij o.a. meerdere gebruikers en partities gebruikt worden kan u terecht in [**Workshop LAMP expert**](/workshop_lamp_expert.md).
+In deze uitgebreidere versie van de workshop wordt er ook meer aandacht besteed 
+aan beveiliging van de server door o.a. meerdere gebruikers en partities aan te 
+maken.
 
 # Voorbereiding
 
@@ -61,9 +64,9 @@ Maak eerst een nieuw host-only network aan. Dit doe je door in **virtualbox** de
 
 Maak nu in VirtualBox een nieuwe machine aan met volgende parameters:
 
-* Geheugen: 1024 MB
+* Geheugen: minstens 1024 MB (indien meer mogelijk is dit beter)
 * Harde Schijf: 20 GB
-* 2 Netwerk Adapters     
+* 2 Netwerk Adapters 
 	* 1: NAT
 	* 2: Host-Only (Kies bij 'name'  de aangemaakte netwerkadapter van hierboven)
 
@@ -74,11 +77,13 @@ Maak nu in VirtualBox een nieuwe machine aan met volgende parameters:
 Start de virtuele machine en kies het ISO bestand van ArchLinux om op te starten.
 U krijgt volgend scherm te zien
 
-![Logo Arch Linux](./afb/arch_live.png)
+![Live Arch Linux](./afb/arch_live.png)
 
 Aangezien we nog geen besturingssysteem geïnstalleerd hebben kiezen we voor 
 'Boot Arch Linux (x86_64)'. Na laden van de installatie komen we in de commandprompt
  terecht en kunnen we starten met de voorbereiding van de installatie.
+
+![Booted Live Arch Linux](./afb/arch_boot.png)
 
 ## Toestenbordindeling instellen
 
@@ -115,7 +120,7 @@ Als uitvoer van dat commando zou je het externe ip van jouw machine moeten zien
 ## Klok goed zetten	
 
 De initiële waarde van de systeemklok is niet altijd accuraat. Om deze bij te
- stellen voeren we volgend commando uit:  
+ stellen voeren we volgend commando uit:
 
 ```bash
 root@archiso ~ # timedatectl set-ntp true
@@ -138,8 +143,8 @@ U zou een uitvoer gelijkaardig aan onderstaande schermafbeelding moeten krijgen:
 
 In deze workshop gaan we verder uit van **/dev/sda** als primaire harde schijf.
 Pas in de commando's dus **sda** aan indien u een andere letter heeft voor jouw 
-harde schijf. Om effectief een partitie op onze schijf aan te maken gaan we met **fdisk** aan de 
-slag gaan.   
+harde schijf. Om effectief partities op onze schijf aan te maken gaan we met **fdisk** aan de 
+slag gaan.
 
 ```bash
 root@archiso ~ # fdisk /dev/sda
@@ -155,10 +160,34 @@ moeten uitzien:
 Controleer zeker of **Disklabel type: dos** is. Indien dat niet zo is voert u 
 eerst "o" in als commando om zo een nieuwe partitietabel aan te maken van het type dos.
 	
+We kiezen er in deze uitgebreide workshop voor om onze schijf in 4 partities op 
+te delen:
+
+* /boot 	: bevat de bootloader (type = msdos)
+* / 		: rootpartitie, bevat alle programma's die op de server draaien
+* /srv/http : alle gegevens van de webserver
+* swap
+
+Er kan eventueel nog gekozen worden om de gebruikersgegevens (**/home**) ook op 
+een aparte partitie te plaatsen. In een serveromgeving wordt dit echter bijna nooit
+gedaan omdat de grootte van deze map te verwaarlozen is.
+
+Het voordeel van deze manier van werken is dat b.v.: de gegevens de server heel 
+gemakkelijk kunnen gemigreerd worden omdat deze op eenzelfde partitie staan.
+
 Om een nieuwe partitie aan te maken voeren we eerst "n" in als commando. 
 Nadien drukt u een aantal keer op "enter", controleer steeds of de standaardwaarden
- overeenkomen met onderstaande waarden:
+ overeenkomen met de gewenste waarden voor de partities. Maak alle partities aan
+volgens de gegevens in onderstaande tabel.
 
+| Partition type | Partition number | First sector | Last sector
+| :------------: | :--------------: | :----------: | :---------: |
+| p              | 1 				|			   |			 |
+| p              | 2 				|			   |			 |
+| p              | 3 				|			   |			 |
+| p              | 4 				|			   | 41943039    |
+
+ 
 1. Partition type: p (we maken een primaire partitie)
 2. Partition number: 1 (Partitie nummer = 1)
 3. First sector: 2048 (Eerste sector harde schijf start op 2048)

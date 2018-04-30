@@ -63,7 +63,7 @@ Maak nu in VirtualBox een nieuwe machine aan met volgende parameters:
 
 * Geheugen: 1024 MB
 * Harde Schijf: 20 GB
-* 2 Netwerk Adapters     
+* 2 Netwerk Adapters
 	* 1: NAT
 	* 2: Host-Only (Kies bij 'name'  de aangemaakte netwerkadapter van hierboven)
 
@@ -74,11 +74,13 @@ Maak nu in VirtualBox een nieuwe machine aan met volgende parameters:
 Start de virtuele machine en kies het ISO bestand van ArchLinux om op te starten.
 U krijgt volgend scherm te zien
 
-![Logo Arch Linux](./afb/arch_live.png)
+![Live Arch Linux](./afb/arch_live.png)
 
 Aangezien we nog geen besturingssysteem geïnstalleerd hebben kiezen we voor 
 'Boot Arch Linux (x86_64)'. Na laden van de installatie komen we in de commandprompt
  terecht en kunnen we starten met de voorbereiding van de installatie.
+
+![Booted Live Arch Linux](./afb/arch_boot.png)
 
 ## Toestenbordindeling instellen
 
@@ -115,7 +117,7 @@ Als uitvoer van dat commando zou je het externe ip van jouw machine moeten zien
 ## Klok goed zetten	
 
 De initiële waarde van de systeemklok is niet altijd accuraat. Om deze bij te
- stellen voeren we volgend commando uit:  
+ stellen voeren we volgend commando uit:
 
 ```bash
 root@archiso ~ # timedatectl set-ntp true
@@ -139,7 +141,7 @@ U zou een uitvoer gelijkaardig aan onderstaande schermafbeelding moeten krijgen:
 In deze workshop gaan we verder uit van **/dev/sda** als primaire harde schijf.
 Pas in de commando's dus **sda** aan indien u een andere letter heeft voor jouw 
 harde schijf. Om effectief een partitie op onze schijf aan te maken gaan we met **fdisk** aan de 
-slag gaan.   
+slag gaan.
 
 ```bash
 root@archiso ~ # fdisk /dev/sda
@@ -506,7 +508,7 @@ De volgende stap is om **PHP** te installeren. PHP is een eenvoudig aan te leren
 
 ## Installatie
 
-Om PHP te installeren loggen we, indien nodig, eerst in onze distribute in als root. Nadien installeren we PHP als volgt:    
+Om PHP te installeren loggen we, indien nodig, eerst in onze distribute in als root. Nadien installeren we PHP als volgt:
 
 ```bash
 [root@virtualbox ~]# pacman -S php
@@ -811,6 +813,7 @@ Description=Sync Website
 
 [Service]
 ExecStart=/root/sync.sh
+# Ongeacht uitkomst vorige uitvoering, altijd herstarten
 Restart=always
 # Synchronisatie elke 5 seconden uitvoeren
 RestartSec=5
@@ -820,7 +823,7 @@ Alias=websitesync.service
 WantedBy=multi-user.target
 ```
 
-Sla het bestand op en controleer of het system de service kan laden met
+Sla het bestand op en controleer of het system de service kan laden.
 
 ```bash
 [root@virtualbox ~]# systemctl list-unit-files | grep website
