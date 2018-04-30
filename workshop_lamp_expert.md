@@ -15,7 +15,6 @@ author: ing. Sebastiaan Labijn
 7. [Uitbreidingen](#uitbreidingen)
 	* [phpMyAdmin](#phpmyadmin)
 	* [VirtualBox GuestAdditions](#virtualbox-guestadditions)
-	* [Synchronisatie bestanden server via gedeelde map](#synchronisatie-bestanden-server-via-gedeelde-map)
 
 # Inleiding
 
@@ -653,7 +652,7 @@ Net zoals bij een nieuwe Linux installatie het geval was, is ook bij MySQL het w
 [virtualbox@virtuallamp ~]# sudo systemctl start mariadb
 ```
 
-Controleer of het starten effectief gelukt is èn de service MariaDB correct draait. 
+Controleer of het starten effectief gelukt is en de service MariaDB correct draait. 
 
 ```bash
 [virtualbox@virtuallamp ~]# sudo systemctl status mariadb
@@ -663,7 +662,7 @@ Controleer of het starten effectief gelukt is èn de service MariaDB correct dra
 
 ## Configuratie
 
-Nu onze service draait kunnen we dus ook het wachtwoord voor de mysql rootgebruiker aanpassen. Voer hiervoor **mysql_secure_installtion** uit. Het huidige wachtwoord is leeg dus duw bij de eerste vraag op "enter". Antwoord nadien op elke vraag met "Y" en voer indien gevraagd het gewenste nieuwe wachtwoord in.
+Nu onze service draait kunnen we dus ook het wachtwoord voor de mysql rootgebruiker aanpassen. Voer hiervoor **mysql_secure_installtion** uit. Het huidige wachtwoord is leeg dus duw bij de eerste vraag op "enter". Antwoord nadien op elke vraag met "Y" en voer indien gevraagd het gewenste nieuwe wachtwoord in. Door overal met "Y" op te antwoorden hebben we er  ook voor gezorgd dat de **root** user enkel op de machine (= localhost) kan inloggen op de databank. Hij kan dus niet via **phpMyAdmin** vanuit de host verbinden.
 
 ## Testdatabank aanmaken
 
@@ -690,13 +689,38 @@ Als u na het laatste commando onderstaande uitvoer krijgt is de testdatabank kla
 
 ![Select MariaDB](./afb/mariadb_select.png)
 
-Verlaat mariadb via **exit** en u keert terug naar de prompt van de standaardgebruiker.
+## Testgebruiker aanmaken
 
+Om onze databank beter af te schermen gaan we nu nog twee gebruikers aanmaken in **MariaDB**.
+De ene gebruiker **testadmin** zal via **phpMyAdmin** toegang krijgen tot de databank **test** en de mogelijkheid hebben de databank te wijzigen.
+Daarnaast maken we ook een gebruiker **testdata** aan die enkel via de webserver (= localhost) toegang zal hebben tot de databank en waarbij zijn
+toegang beperkt is  tot het uitvoeren van **select, insert, update of delete** queries en dus  geen beheer van de databank zelf.
+
+```sql
+MariaDB [(test)] CREATE USER IF NOT EXISTS 'testadmin'@'192.168.56.%' IDENTIFIED BY 'vul hier uw passwoord in');
+MariaDB [(test)] GRANT ALL PRIVILEGES ON test.* TO 'testadmin'@'192.168.56.%';
+MariaDB [(test)] SHOW GRANTS FOR 'testadmin'@'192.168.56.%';
+MariaDB [(test)] CREATE USER IF NOT EXISTS 'testdata'@'localhost' IDENTIFIED BY 'vul hier uw passwoord in');
+MariaDB [(test)] GRANT SELECT,INSERT,DELETE,UPDATE ON test.* TO 'testdata'@'localhost';
+MariaDB [(test)] SHOW GRANTS FOR 'testdata'@'localhost';
+```
+
+![Grants MariaDB](./afb/grants_testdata.png)
+
+Verlaat mariadb via **exit** en u keert terug naar de prompt van de standaardgebruiker.
 Hiermee is de installatie en configuratie voor MariaDB klaar. 
 
-**AANDACHT:** in een professionele omgeving worden aparte gebruikers aangemaakt per databank. Hier wordt voor de gemakkelijkheid enkel de root user gebruikt.
+Probeer nu in **MariaDB** in te loggen met **testdata** en **testadmin**. 
+Verbinden als **testdata** zal enkel lukken indien ook de databank **test** werd meegeven in het commando
+
+```bash
+[virtualbox@virtuallamp ~]$ mysql test -u testdata -p
+```
+
+Het is immers de enigste databank waarvoor hij rechten heeft. Verbinden als **testadmin** mag niet lukken omdat deze geen rechten heeft om via **localhost** te verbinden. Deze kan enkel verbinden via **phpMyAdmin**.
 
 **EXTRA:** om niet altijd alle SQL queries via command prompt te moeten ingeven kan je ook het pakket **phpMyAdmin** installeren om via de browser op de host jouw databank te beheren (zie [Uitbreidingen](#uitbreidingen)).
+Via **phpMyAdmin** zal de gebruiker **testadmin** wel kunnen verbinden met de databank **test** om deze te beheren.
 
 # PHP
 
@@ -704,15 +728,15 @@ De volgende stap is om **PHP** te installeren. PHP is een eenvoudig aan te leren
 
 ## Installatie
 
-Om PHP te installeren loggen we, indien nodig, eerst in onze distribute in als root. Nadien installeren we PHP als volgt:    
+Om PHP te installeren loggen we, indien nodig, eerst in onze distribute in als **standaardgebruiker**. Nadien installeren we PHP als volgt:    
 
 ```bash
-[root@virtualbox ~]# pacman -S php
+[virtualbox@virtuallamp ~]$ sudo pacman -S php
 ```
 
 ## Configuratie
 
-Nu PHP geïnstalleerd is moeten we ook een aantal zaken gaan configureren. PHP is geen service zoals **MariaDB** of **Apache** en moet dus ook niet geactiveerd worden. Standaard zijn echter heel wat uitbreidingen niet geactiveerd. Aangezien wij via PHP onze MySQL databank wensen te bevragen zullen wij deze functionaliteit moeten activeren. Dit doen door het bestand **/etc/php/php.ini aan te passen**. Open het bestand met **vi** of **nano** en zoek naar de regel **;extension=pdo_mysql** en verwijder de ; aan het begin van de regel om deze extensie te activeren. Sla de wijzigingen in het bestand op. Controleer nu of het bestand **pdo_mysql.so** aanwezig is in de map **/usr/lib/php/modules/**
+Nu PHP geïnstalleerd is moeten we ook een aantal zaken gaan configureren. PHP is geen service zoals **MariaDB** of **Apache** en moet dus ook niet geactiveerd worden. Standaard zijn echter heel wat uitbreidingen niet geactiveerd. Aangezien wij via PHP onze MySQL databank wensen te bevragen zullen wij deze functionaliteit moeten activeren. Dit doen door het bestand **/etc/php/php.ini aan te passen**. Open het bestand met **vim** of **nano** en zoek naar de regel **;extension=pdo_mysql** en verwijder de ; aan het begin van de regel om deze extensie te activeren. Sla de wijzigingen in het bestand op. Controleer nu of het bestand **pdo_mysql.so** aanwezig is in de map **/usr/lib/php/modules/**
 
 **TIP:** Het kan ook handig zijn om **display errors = on** in **/etc/php/php.ini** te plaatsen. Deze staat nu nog op 'off'. Indien deze 'on' staat zullen eventuele fouten in de PHP pagina getoond worden in de browser. Indien deze waarde op off staat zal er bij fouten enkel een witte pagina getoond worden. De waarde 'on' is dus enkel nuttig voor ontwikkelomgevingen. In productie staat deze waarde op 'off'
 
@@ -729,29 +753,24 @@ Als laatste stap om onze **LAMP** stack te vervolledigen gaan **Apache** install
 Om Apache te installeren loggen we, indien nodig, eerst in onze distribute in als root. We installeren naast **Apache** ook al onmiddellijk de uitbreiding voor PHP mee. Na inloggen voeren we in de commandprompt het volgende uit.
 
 ```bash
-[root@virtualbox ~]# pacman -S apache php-apache
+[virtualbox@virtuallamp ~]$ sudo pacman -S apache php-apache
 ```
 
 Net zoals bij MariaDB het geval was, moeten we ook Apache als service activeren en starten. Merk op dat de naam van de service niet **Apache** is maar **httpd**!
 
 ```bash
-[root@virtualbox ~]# systemctl enable httpd
-[root@virtualbox ~]# systemctl start httpd
+[virtualbox@virtuallamp ~]$ sudo systemctl enable httpd
+[virtualbox@virtuallamp ~]$ sudo systemctl start httpd
+[virtualbox@virtuallamp ~]$ sudo systemctl status httpd
 ```
 
-Controleer ook nu de status van de **httpd** service
-
-```bash
-[root@virtualbox ~]# systemctl status httpd
-```
-
-Onze Apache webserver draait nu. Dit betekent dat we via een browser in ons host besturingssysteem naar http://192.168.56.56 kunnen surfen en zo de indexpagina van onze wesbite bereiken. Test dit nu uit!
+Onze **Apache** webserver draait nu. Dit betekent dat we via een browser in ons host besturingssysteem naar http://192.168.56.56 kunnen surfen en zo de indexpagina van onze wesbite bereiken. Test dit nu uit!
 
 ![Indexpagina Apache](./afb/apache_index.png)
 
 ## Configuratie
 
-Nu onze service draait gaan we deze verder configureren zodat we PHP pagina's kunnen laden. Het eerste wat we moeten instellen is de locatie waar de bestanden van onze website zullen komen. Dit doen we door het bestand **/etc/httpd/conf/httpd.conf** aan te passen, dus open dit bestand via **vi** of **nano**. Zoek naar volgende regels:
+Nu onze service draait gaan we deze verder configureren zodat we PHP pagina's kunnen laden. Het eerste wat we moeten instellen is de locatie waar de bestanden van onze website zullen komen. Dit doen we door het bestand **/etc/httpd/conf/httpd.conf** aan te passen, dus open dit bestand via **vim** of **nano**. Zoek naar volgende regels:
 
 ```bash
 LoadModule mpm_event_module modules/mod_mpm_event.so
@@ -760,7 +779,9 @@ LoadModule mpm_event_module modules/mod_mpm_event.so
 
 Verplaats nu de **#** van de regel met prefork naar de regel met event. We willen immers de **mpm_prefork_module** gebruiken omdat deze beter overweg kan met threading bij PHP.
 
-Voer onder de laatste #loadmodule regel volgende regels specifiek voor php toe:
+Zoek ook naar de regel **#LoadModule rewrite_module modules/mod_rewrite.so** en verwijder de # aan het begin van de regel. Dit zal ons toelaten om later via een .htaccess bestand redirects uit te voeren in webpagina's.
+
+Voer onder de laatste #loadmodule regel volgende regels specifiek voor **PHP** toe. Meerdere regels plakken in **vim** doet u met "Ctrl + Shift + v"
 
 ```bash
 LoadModule php7_module modules/libphp7.so
@@ -774,7 +795,20 @@ DocumentRoot "/srv/http"
 <Directory "/srv/http">
 ```
 
-Deze instelling geeft aan dat wij de documenten van onze website in de map **/srv/http/** zullen plaatsen. Voor de eenvoud van deze workshop worden deze mappen NIET aangepast.
+Pas de inhoud inhoud als volgt
+
+```bash
+DocumentRoot "/srv/http"
+
+<Directory "/srv/http">
+	# Enkel toelaten dat andere pagina's gebruikt worden
+	Options FollowSymLinks
+	# Speciale instellingen via .htaccess  toelaten
+	AllowOverride all
+	# Geen toegang zonder rechten
+	Require all Granted
+</Directory>
+```
 
 Zoek nu naar de regels:
 
@@ -784,7 +818,10 @@ Zoek nu naar de regels:
 </IfModule
 ```
 
-Voer na index.html ook de tekst index.php toe.
+Voeg na index.html ook de tekst index.php toe.
+
+Zoek nu naar de regel **#Include conf/extra/httpd-vhosts.conf** en verwijder de # aan het begin van de regel.
+Dit laat ons toe om meerdere webapplicaties op eenzelfde server te hosten.
 
 Ga nu helemaal naar onder in het bestand en voeg volgende regels toe specifiek voor **PHP 7**:
 
@@ -792,32 +829,66 @@ Ga nu helemaal naar onder in het bestand en voeg volgende regels toe specifiek v
 # PHP 7
 Include conf/extra/php7_module.conf
 ```
+Sla de wijzigen op in het bestand. Controleer of de syntax juist is met **apachectl configtest** en herstart nu de httpd service met **systemctl restart httpd**. Controleer steeds na het herstarten van een service zijn status!
+Indien u nu de browser van je host naar http://192.168.56.56 surft krijgt u niet langer de indexpagina te zien maar een **403** fout dat u geen toegang heeft.
 
-Sla de wijzigen op in het bestand en herstart nu de httpd service met **systemctl restart httpd**
+![403 Apache](./afb/apache_403.png)
 
-Controleer steeds na het herstarten van een service zijn status!
+Aangezien we de optie aangezet hebben om meerdere applicatie te hosten op onze 
+webserver gaan we nu een **virtual host** toevoegen voor onze testapplicatie. Open het bestand **/etc/httpd/conf/extra/httpd-vhosts.conf** met **vim** of **nano**. Plaats volgende inhoud in het bestand waarmee de huidige virtual hosts die als voorbeeld gedefinieerd werden zullen overschreven worden.
+ 
+```bash
+<VirtualHost *:80>
+    ServerAdmin webmaster@virtuallamp.com
+    DocumentRoot "/srv/http/test"
+    ServerName www.virtuallamp.com
+    ErrorLog "/var/log/httpd/virtuallamp.com-error_log"
+</VirtualHost
+```
+
+Herstart nu de httpd service met **systemctl restart httpd**. Controleer steeds na het herstarten van een service zijn status!
+Open nu de pagina in de host en u zal niet langer een **403** (= geen rechten) maar een **404** (= pagina niet gevonden) fout krijgen. Dit komt omdat de map test en bijhorende pagina's nog niet bestaan.
+
+![404 Apache](./afb/apache_404.png)
 
 ## Testpagina's toevoegen
 
-Als laatste stap gaan we nu twee pagina's toevoegen op onze website. Zoals uit vorige paragraaf bleek moeten we deze bestanden aan de **/srv/http** map toevoegen. Voer volgend command uit om de pagina **index.php** aan te maken waarin we de detaisl van onze PHP installatie weergeven.
+Als laatste stap gaan we nu twee php pagina's toevoegen op onze website en een **.htaccess** bestand. Zoals uit vorige paragraaf bleek moeten we deze bestanden aan de **/srv/http** map toevoegen. Deze bestat echter nog niet, dus maak deze aan met **sudo** rechten.
 
 ```bash
-[root@virtualbox ~]# echo "<?php phpinfo(); ?>" > /srv/http/index.php
+[virtualbox@virtuallamp ~]$ sudo mkdir /srv/http/test
 ```
 
-Open nu op de host jouw browser opnieuw en surf naar http://192.168.56.56/ Indien alles gelukt is ziet u de informatie pagina van PHP zoals hieronder
+Maak nu in jouw host besturingssysteem volgende bestanden aan met weergegeven inhoud. Upload telkens elke bestand via SFTP naar jouw homemap. Vandaar verplaatst u het bestand, via de command prompt, naar **srv/http/test/** d.m.v. **sudo** rechten.
+
+**index.php**
+
+```php
+<?php phpinfo(); ?>
+```
+
+Open nu op de host jouw browser opnieuw en surf naar http://192.168.56.56 Indien alles gelukt is ziet u de informatie pagina van PHP zoals hieronder
 
 ![PHP overzichtpagina Apache](./afb/apache_php.png)
 
-Indien dit zo is dan is de integratie van PHP met Apache gelukt. Een laatste stap is nu een pagina te maken waarbij onze data uit de databank geladen word. Maakt hiervoor in de map **/srv/http** een bestand **databank.php** aan en plaats volgende code in dat bestand.
+Indien dit zo is dan is de integratie van PHP met Apache gelukt. Mocht dit toch niet zo zijn en u krijgt een foutpagina **500** te zien dan zal dit waarschijnlijk aan de rechten liggen van de bestanden.
+PHP bestanden moeten immers kunnen uitgevoerd worden. Controller of de rechten ingesteld staan als **rwxrwdr-x" op index.php in /srv/http/test. Pas deze aan indien dat niet zo was
+
+```bash
+[virtualbox@virtuallamp ~]$ sudo chmod 775 *.php
+```
+
+Probeer het nu opnieuw. Nu zou het wel moeten lukken om de pagina te zien.
+
+**databank.php**
 
 ```php
 <?php
 // De details voor connectie met databank
 $DB_host = "localhost";
 $DB_port = "3306";
-$DB_user = "root";
-$DB_password = "VUL DIT AAN MET JOUW WACHTWOORD";
+$DB_user = "testdata";
+$DB_password = "VUL DIT AAN MET JOUW WACHTWOORD VOOR TESTDATA";
 $DB_name = "test";
 
 // Proberen om een databank connectie op te zetten
@@ -847,13 +918,27 @@ catch (PDOException $e) {
 ?>
 ```
 
-Ga nu in de browser van je host naar http://192.168.56.56/databank.php en u zou een overzicht van de gebruikers moeten zien als volgt:
+Upload ook dit bestand naar je server en plaats het in **/srv/http/test/**. Ga nu in de browser van je host naar http://192.168.56.56/databank.php en u zou een overzicht van de gebruikers moeten zien als volgt:
 
 ![Databank Apache](./afb/apache_databank.png)
 
 Dit betekent dat we onze MySQL databank kunnen aanspreken vanuit PHP op onze Apache webserver. Hiermee is onze LAMP stack opgezet!!
 
-**EXTRA:** om niet altijd bestanden manueel te moeten typen op onze server kiezen we uiteraard voor een gemakkelijkere manier. Enerzijds kan je een **FTP** server (of **SFTP**) opzetten zodat je met een FTP-client vanop de host bestanden kan opladen naar de map van de webserver. Anderzijds kan je ook een script uitvoeren die automatisch alle gewijzigde bestanden uit een gedeelde map op de host kopieert naar de map van de website op de server. Beide oplossingen zijn beschreven in [Uitbreidingen](#uitbreidingen).
+**EXTRA:** om onze server mooier af te schermen tegen foute URL's gaan we een .htaccess bestand gebruiken. Dit zorgt er voor dat bij een Apache paginafout 403, 404, of 500 de gebruiker doorverwezen wordt naar de indexpagina.
+
+**.htaccess**
+
+```bash
+ErrorDocument 403 /index.php
+ErrorDocument 404 /index.php
+ErrorDocument 500 /index.php
+
+RewriteEngine On
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteRule ^(.*)$ /index.php
+```
+
+Upload ook dit bestand naar je server en plaats het in **/srv/http/test/**. Herstart opnieuw de **httpd** service en probeer nu een pagina te bereiken die niet bestaat, b.v.: http://192.168.56.56/fout.php. U zou nu naar de indexpagina moeten worden omgeleid.
 
 # Uitbreidingen
 
@@ -863,17 +948,17 @@ Om het beheer van de databank te vergemakkelijken en dus zo het gebruik van **My
 
 ### Installatie
 
-Indien nodig log je als root in de virtuele machine in. Voer de installatie uit met het commando
+Indien nodig log je als **standaardgebruiker** in de virtuele machine in. Voer de installatie uit met het commando
 
 ```bash
-[root@virtualbox ~]# pacman -S phpmyadmin
+[virtualbox@virtuallamp ~]$ sudo pacman -S phpmyadmin
 ```
 
-Aangezien deze uitbreiding, zoals de naam al aangeeft, gebruik zal maken van PHP moeten we ook de extensie activeren om met **mysqli** te werken. Open het bestand **/etc/php/php.ini** in **vi** of **nano** en zoek naar de regel **;extension=mysli** en verwijder de ; op het begin van deze regel.
+Aangezien deze uitbreiding, zoals de naam al aangeeft, gebruik zal maken van PHP moeten we ook de extensie activeren om met **mysqli** te werken. Open het bestand **/etc/php/php.ini** in **vim** of **nano** en zoek naar de regel **;extension=mysli** en verwijder de ; op het begin van deze regel.
 
 ### Configuratie
 
-Nu de extensie ingeschakeld is moeten we ook in **Apache** een directory toevoegen die verwijst naar de **phpMyAdmin** bestanden. Om dit te doen openen we het bestand **/etc/httpd/conf/httpd.conf** in **vi** of **nano**. Zoek naar de **Include** regel van PHP7 (zie [PHP](#php)) en voeg daaronder volgende regels toe:
+Nu de extensie ingeschakeld is moeten we ook in **Apache** een directory toevoegen die verwijst naar de **phpMyAdmin** bestanden. Om dit te doen openen we het bestand **/etc/httpd/conf/httpd.conf** in **vim** of **nano**. Zoek naar de **Include** regel van PHP7 (zie [PHP](#php)) en voeg daaronder volgende regels toe:
 
 ```bash
 # phpMyAdmin
@@ -895,11 +980,11 @@ Alias /phpmyadmin "/usr/share/webapps/phpMyAdmin"
 Dit zal er voorzorgen dat we via http://192.168.56.56/phpmyadmin de applicatie kunnen bereiken dankzij de alias die we gedefinieerd hebben. Alvorens dit zo is moeten we uiteraard eerst onze **httpd** service herstarten
 
 ```bash
-[root@virtualbox ~]# systemctl restart httpd
-[root@virtualbox ~]# systemctl status httpd
+[virtualbox@virtuallamp ~]$ sudo systemctl restart httpd
+[virtualbox@virtuallamp ~]$ sudo systemctl status httpd
 ```
 
-Bij syntax fouten in het configuratiebestand zal de service niet goed gestart zijn! Indien het lukt om te pagina te laden krijgt u onderstaand scherm te zien:
+Bij syntaxfouten in het configuratiebestand zal de service niet goed gestart zijn! Indien het lukt om te pagina te laden krijgt u onderstaand scherm te zien:
 
 ![Aanmelden phpMyAdmin](./afb/phpmyadmin_login.png)
 
@@ -907,42 +992,7 @@ Probeer op deze startpagina als root in te loggen met uw **mysql wachtwoord**. N
  
 ![Dashboard phpmyadmin](./afb/phpmyadmin_dashboard.png)
 
-Hierdoor is de installatie van **phpMyAdmin** geslaagd. Links in de boomstructuur kan u de aangemaakte database test terugvinden. Als u deze openklapt kan u de tabel user terugvinden en eventueel aanpassen.
-
-## FTP server
-
-Momenteel maken we de bestanden onze server manueel aan en wordt ook op de server zelf de inhoud via **vi** of **nano** toegevoegd. Dit is echter zeer omslachting. Om bestanden van uit onze host te kunnen opladen naar onze server gaan we een **FTP** service opzetten met **bftpd** (Voor **SFTP** en **SSH** zie **Workshop LAMP expert**](/workshop_lamp_expert.md)).
-
-### Installatie
-
-Indien nodig log je als root in de virtualbox in. Voer de installatie uit met het commando
-
-```bash
-[root@virtualbox ~]# pacman -S bftpd
-```
-
-### Configuratie
-
-De configuratie van **bftpd** verloopt via het bestand **/etc/bftpd.conf**. Open dit bestand en ga helemaal naar onder. Pas daar de tekst voor user root aan als volgt:
-
-```bash
-user root {
-	ROOTDIR="/srv/http"
-}
-```
-
-Aangezien **FTP** een service is moeten we deze dus opnieuw activeren en starten:
-
-```bash
-[root@virtualbox ~]# systemctl enable bftpd
-[root@virtualbox ~]# systemctl start bftpd
-```
-
-Gebruikt nu een ftp-client op de host, b.v.: **FileZilla**, en maak een verbinding als root user. U kan ook in de browser surfen naar [**ftp://192.168.56.56**](ftp://192.168.56.56/) en aanmelden als root. In beide gevallen zal u de hoofdmap van onze website zien met daarin de eerder aangemaakte PHP bestanden:
- 
-![Index ftp server](./afb/ftp_index.png)
-
-Indien u iets anders wil dan een bestand downloaden, b.v.: naam wijzigen, bestand opladen, dan is dat enkel mogelijk door gebruik te maken van een FTP-client.
+Probeer nadien ook even in te loggen als **testadmin**. Dit zou nu ook moeten lukken. Hierdoor is de installatie van **phpMyAdmin** geslaagd. Links in de boomstructuur kan u de aangemaakte database test terugvinden. Als u deze openklapt kan u de tabel user terugvinden en eventueel aanpassen.
 
 ## VirtualBox GuestAdditions
 
@@ -953,99 +1003,13 @@ Het installeren van de **GuestAdditions** zal ons toelaten een paar extra zaken 
 Indien nodig, log in als root. Voer daarna de installatie uit.
 
 ```bash
-[root@virtualbox ~]# pacman -S virtualbox-guest-modules-arch
-[root@virtualbox ~]# pacman -S virtualbox-guest-utils
-[root@virtualbox ~]# systemctl enable vboxservice
-[root@virtualbox ~]# systemctl start vboxservice
+[virtualbox@virtuallamp ~]$ sudo pacman -S virtualbox-guest-modules-arch
+[virtualbox@virtuallamp ~]$ sudo pacman -S virtualbox-guest-utils
+[virtualbox@virtuallamp ~]$ sudo systemctl enable vboxservice
+[virtualbox@virtuallamp ~]$ sudo systemctl start vboxservicev
+[virtualbox@virtuallamp ~]$ sudo systemctl status vboxservice
 ```
 
 ### Gedeelde map
 
-Indien u een gedeelde map wil gebruiken moet u nu eerst de virtuele machine afsluiten (**shutdown -h now**). Open de instellingen van de server in VirtualBox en ga naar 'shared folders'. Voeg hier een nieuwe map toe die je wil delen. Zorg er zeker voor dat de optie auto-mount aangevinkt werd en dat de naam **GEEN** spaties bevat. Start nu de machine opnieuw op en log in als root. In de map **/media** zou nu een map moeten zien met als naam **sf_<naam gedeelde map>**
-
-## Synchronisatie bestanden server via gedeelde map
-
-Om het manuele werk dat we moeten doen via **FTP** door telkens de bestanden op te laden te vergemakkelijken zullen we bestanden uit een bepaalde map op de host automatisch synchroniseren naar de website map op de server. 
-
-**LET OP:** als u deze methode toepast wordt het effect van de FTP server teniet gedaan, want alle rechtstreeks wijzigingen in **/srv/http** zullen ongedaan gemaakt worden door de synchronisatie!
-
-**AANDACHT:** dit deel gaat er vanuit dat u de **VirtualBox GuestAdditions** al heeft geïnstalleerd (zie [VirtualBox GuestAdditions](#virtualbox-guestadditions)) en een gedeelde map heeft aangemaakt.
-
-### Configuratie
-
-Het script dat automatisch zal synchroniseren zal draaien als een systeemservice. We gaan dus een eigen service schrijven en deze toevoegen. 
-
-De synchronisatie zelf gebeurd via **rsync**. Dit pakket is niet standaard meegeleverd dus dit zullen we eerst installeren.
-
-```bash
-[root@virtualbox ~]# pacman -S rsync
-```
-
-Eerst maken we het script aan met de code tot synchronisate. Maak een bestand **sync.sh** aan in de map **/root** en plaats volgende code in het bestand:
-
-```bash
-#!/bin/bash
-# De mappen (sf = shared folder, wf = website folder)
-sf="/media/<PLAATS HIER DE NAAM VAN JOUW MAP>/"
-wf="/srv/http"
-# Synchronisatie uitvoeren (verborgen bestanden niet mee syncen)
-rsync -az --quiet --no-perms --delete --exclude ".*" "$sf" "$wf"
-```
-
-Zorg er voor dat dit bestand **uitvoerbaar** is voor **root** en **group** via **chmod 770 sync.sh**. Voer nu het commando **cp /srv/http/&ast; /media/sf_<naam gedeelde map>** uit. Dit zorgt er voor dat de bestanden van de website eerst naar de gedeelde map worden gekopieerd. Anders was je deze kwijt door synchronisatie daar ze nog niet op de host aanwezig zijn. Je kan dit script nu testen op zijn werking door **./sync.sh** uit te voeren. Plaats een leeg bestand in de gedeelde map op de host en controleer in de guest of het bestand werd overgezet. Dit kan bijvoorbeeld door het **tree** commando uit te voeren. Dit is een heel handig commando dat een boomstructuur van een map toont. Dit is opnieuw niet standaard geïnstalleerd
-	
-```bash
-[root@virtualbox ~]# pacman -S tree
-[root@virtualbox ~]# tree /srv/http
-```
-
-![tree](./afb/tree.png)
-
-Het script werkt maar het nadeel is nu dat de synchronisatie nog altijd manueel moet geactiveerd worden. Om dit op te lossen gaan we nu een systeemservice aanmaken dit het script voor ons elke 5 seconden zal oproepen. Maak een bestand **websitesync.service** aan in de map **/usr/lib/systemd/system** met volgende inhoud:
-
-```bash
-[Unit]
-Description=Sync Website
-
-[Service]
-ExecStart=/root/sync.sh
-Restart=always
-# Synchronisatie elke 5 seconden uitvoeren
-RestartSec=5
-
-[Install]
-Alias=websitesync.service
-WantedBy=multi-user.target
-```
-
-Sla het bestand op en controleer of het system de service kan laden met
-
-```bash
-[root@virtualbox ~]# systemctl list-unit-files | grep website
-```
-
-![Systeemservice websitesync](./afb/websitesync.png)
-
-Het enige wat nu nog rest is de service effectief te activeren en te starten volgens
-
-```bash
-[root@virtualbox ~]# systemctl enable websitesync.service
-[root@virtualbox ~]# systemctl start websitesync.service
-```
-
-Plaats nu nog enkele bestanden op de host in de gedeelde map en controleer of deze ook op de server er bij komen.
-Herstart ook de virtuele machine en controleer de status van de service na reboot. Deze zou nog altijd moeten actief zijn.
-
-Om de status van een service constant, in ons voorbeeld om de halve seconde, te monitoren kan u gebruik maken van onderstaand commando.
-
-```bash
-[root@virtualbox ~]# watch –n 0.5 systemctl status websitesync.service
-```
-
-Deze 'blokkeert' wel de terminal voor gebruikersinvoer, dus u kan de **watch** altijd onderbreken met "ctrl + c".
-
-**TIP:** voeg het commando van **watch** als alias toe aan .bash_rc om zo gemakkelijk nadien de synchronisatie te kunnen monitoren zonder altijd he volledige commando te moeten typen
-
-```bash
-[root@virtualbox ~]# echo "alias 'watchsync'='watch –n 0.5 systemctl status websitesync.service'" >> ~/.bashrc
-```
+Indien u een gedeelde map wil gebruiken moet u nu eerst de virtuele machine afsluiten (**shutdown -h now**). Open de instellingen van de server in VirtualBox en ga naar 'shared folders'. Voeg hier een nieuwe map toe die je wil delen. Zorg er zeker voor dat de optie auto-mount aangevinkt werd en dat de naam **GEEN** spaties bevat. Start nu de machine opnieuw op en log in. In de map **/media** zou nu een map moeten zien met als naam **sf_<naam gedeelde map>**
