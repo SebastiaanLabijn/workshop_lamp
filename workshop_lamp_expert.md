@@ -161,12 +161,14 @@ Controleer zeker of **Disklabel type: dos** is. Indien dat niet zo is voert u
 eerst "o" in als commando om zo een nieuwe partitietabel aan te maken van het type dos.
 	
 We kiezen er in deze uitgebreide workshop voor om onze schijf in 4 partities op 
-te delen:
+te delen.
 
-* /boot 	: bevat de bootloader (type = msdos)
-* / 		: rootpartitie, bevat alle programma's die op de server draaien
-* /srv/http : alle gegevens van de webserver
-* swap
+| Naam partitie | Omschrijving 					 | Bestandstype | Mountpoint |
+| :------------ | :----------------------------- | :----------- | :--------- |
+| boot			| bevat de bootloader 			 | msdos/fat	| /boot		 |
+| root			| bevat de serverprogrammas 	 | ext4			| /			 |
+| webserverdata | bevat de data van de webserver | ext4			| /srv/http  |
+| swap          |  								 | swap	  	    | -			 |
 
 Er kan eventueel nog gekozen worden om de gebruikersgegevens (**/home**) ook op 
 een aparte partitie te plaatsen. In een serveromgeving wordt dit echter bijna nooit
@@ -178,29 +180,43 @@ gemakkelijk kunnen gemigreerd worden omdat deze op eenzelfde partitie staan.
 Om een nieuwe partitie aan te maken voeren we eerst "n" in als commando. 
 Nadien drukt u een aantal keer op "enter", controleer steeds of de standaardwaarden
  overeenkomen met de gewenste waarden voor de partities. Maak alle partities aan
-volgens de gegevens in onderstaande tabel.
+volgens de gegevens in onderstaande tabel. De tabel gaat uit van een machine met 1GB
+geheugen en 20 GB harde schijf. Indien u meer geheugen genomen heeft, vermindert
+u de groote van de tweede partitie (=root) met de extra hoeveelheid geheugen genomen boven 1 GB.
+De extra hoeveelheid vermeerder u dan bij de vierder partitie (=swap)
 
-| Partition type | Partition number | First sector | Last sector
+**Voorbeeld:** Indien u 4 GB geheugen nam is de laatste sector van de tweede partitie +9.8G
+en de deze van de vierde partitie +4G. In dat geval kloppen ook de waarden van de
+eerste sector niet zoals weergegeven in de tabel. U verandert deze dan ook niet en
+laat het systeem zelf de waarden invullen.
+
+| Partition type | Partition number | First sector | Last sector |
 | :------------: | :--------------: | :----------: | :---------: |
-| p              | 1 				|			   |			 |
-| p              | 2 				|			   |			 |
-| p              | 3 				|			   |			 |
-| p              | 4 				|			   | 41943039    |
-
+| p              | 1 				| 2048		   | +200MB		 |
+| p              | 2 				| 411648	   | +12.8G		 |
+| p              | 3 				| 27215872	   | +6G		 |
+| p              | 4 				| 39798784	   | +1G	     |
  
-1. Partition type: p (we maken een primaire partitie)
-2. Partition number: 1 (Partitie nummer = 1)
-3. First sector: 2048 (Eerste sector harde schijf start op 2048)
-4. Last sector: 41943039 (Maximale grootte schijf benutten, indien u een harde schijf gemaakt heeft die niet 20 GB groot is, zal deze waarde anders zijn)
+Controleer met "p" of de partitietabel goed gemaakt is
 
-U krijgt een boodschap dat er een nieuwe partitie werd aangemaakt.
-
-![fdisk aangemaakte partitie](./afb/fdisk_partitie.png)
+![fdisk tabel partities](./afb/fdisk_partitie_tabel.png)
 
 Voer nu het commando "a" uit om de partitie **bootable** te maken.
- De BIOS zal immers zoeken naar een opstartbare harde schijf.
+ De BIOS zal immers zoeken naar een opstartbare harde schijf. Selecteer "1" om de eerste partitie (=bios) bootable te maken.
 
-![fdisk bootable partitie](./afb/fdisk_bootable.png)
+![fdisk bootable partitie](./afb/fdisk_bootable_expert.png)
+
+Zoals uit onze partitietabel hierboven af te leiden is, klopt het bestandstype van
+de eerste en vierde partitie nog niet. Deze moeten **fat** en **swap** worden.
+
+Voer "t" in om het type van een partitie te wijzigen. Kies de gewenste partitie ("1" of "4")
+ en geef dan het nummer in van het gewenste bestandstype ("b" voor boot of "82" voor swap).
+
+![fdisk types partities](./afb/fdisk_partitie_types.png)
+
+Controleer nu een laatste maal met "p" de partitietabel.
+
+![fdisk tabel partities](./afb/fdisk_partitie_final.png)
 
 Schrijf nu ten slotte alle wijzigingen naar de harde schijf weg met "w". 
 Dit sluit ook **fdisk** af. Hierdoor keren we terug naar onze normale command prompt.
@@ -209,33 +225,42 @@ aangemaakt.
 
 ![fdisk wijzigingen wegschrijven](./afb/fdisk_sync.png)
 
-We hebben nu wel een opstartbare harde schijf aangemaakt met een partitie maar 
-deze beschikt nog niet over een bestandssysteem. In deze workshop gaan we 
+We hebben nu wel een harde schijf met opstartbare aangemaakt maar deze beschikt 
+nog niet over een bestandssysteem per partitie. In deze workshop gaan we 
 gebruik maken van het **fourth extended file system** ofwel **ext4**. Dit is de 
-standaard bestandsindeling voor huidige Linuxdistributies. Via volgend commando 
-wordt onze partitie geformatteerd naar ext4
+standaard bestandsindeling voor huidige Linuxdistributies. Maar voor elke partitie
+nu de bestandssystemen aan
 
 ```bash
-root@archiso ~ # mkfs.ext4 /dev/sda1
+root@archiso ~ # mkfs.-t vfat /dev/sda1
+root@archiso ~ # mkfs.ext4 /dev/sda2
+root@archiso ~ # mkfs.ext4 /dev/sda3
+root@archiso ~ # mkswap /dev/sda4
 ```
 
 ## Installeren basis ArchLinux
 
-Nu we een geformatteerde harde schijf hebben moeten we deze eerst **mounten** om de 
-installatie verder te zetten. We kunnen enkel een harde schijf benaderen indien
-deze gemount is. Hierdoor verwijst het apparaat naar een bepaalde map binnen de 
-bestandsstructuuur van **Linux**. Wij zullen de eerste partie van sda mounten naar 
-de map **/mnt**
+Nu we een geformatteerde harde schijf hebben moeten we eerst de partities **mounten** 
+om de installatie verder te zetten. We kunnen enkel (partities op) een harde schijf  
+benaderen indien deze gemount is. Hierdoor verwijst het apparaat naar een bepaalde 
+map binnen de bestandsstructuuur van **Linux**. Omdat we enkel kunnen mounten naar
+een bestaande map zullen ook bepaalde maeppen eerste aangemaakt moeten worden.
 
 ```bash
-root@archiso ~ # mount /dev/sda1 /mnt
+root@archiso ~ # mount /dev/sda2 /mnt
+root@archiso ~ # mkdir /mnt/boot
+root@archiso ~ # mount /dev/sda1 /mnt/boot
+root@archiso ~ # mkdir -p /mnt/srv/http
+root@archiso ~ # mount /dev/sda3 /mnt/srv/http
+root@archiso ~ # swapon /dev/sda4
 ```
 
-Nadat we de partitie gemount hebben kunnen we de basisonderdelen van **Arch Linux**
- hierop installeren.
+Nadat we elke partitie gemount hebben kunnen we de basisonderdelen van **Arch Linux**
+ hierop installeren. Deze zijn voor deze workshop uitgebreid met een aantal extra
+hulpprogramma's die in **base-devel*** zitten
 
 ```bash
-root@archiso ~ # pacstrap /mnt base
+root@archiso ~ # pacstrap /mnt base base-devel
 ```
 
 Tijdens de installatie zullen indien nodig eerst recentere pakketten worden gedownload. 
@@ -259,9 +284,12 @@ Dit doen we door volgend commando uit te voeren
 root@archiso ~ # genfstab -U /mnt >> /mnt/etc/fstab
 ```
 
-Controleer nu de inhoud van **fstab** of er een entry toegevoegd werd voor /dev/sda1.
+Controleer nu de inhoud van **fstab** of er een entry toegevoegd werd voor elke 
+partitie op /dev/sda.
 
-Om nu de ArchLinux-installatie zelf verder in te stellen moeten als root in het 
+![fstab](./afb/fstab.png)
+
+Om nu de Arch Linux-installatie zelf verder in te stellen moeten als **root** in het 
 nieuwe systeem aanmelden, dit doen we als volgt
 
 ```bash
@@ -270,7 +298,7 @@ root@archiso ~ # arch-chroot /mnt
 
 ![Arch Chroot](./afb/arch_chroot.png)
 
-Merk op dat hierdoor ook de command prompt aangepast werd!!
+Merk op dat hierdoor ook de command prompt aangepast werd!
 
 ## Tijdzone instellen
 
@@ -291,28 +319,26 @@ Controleer tenslotte of de datum en tijd correct zijn met het commando **date**
 
 ## Taal & Regio instellen
 
+We gaan in deze versie van de workshop werken met **locale** **en_US.UTF-8**. 
 Open het bestand **/etc/locale.gen** met **nano** of **vi**. Zoek de regel met 
-gewenste locale en verwijder de # aan het begin van de regel. Voor Belgische
-regio is dit nl_BE.UTF8. Sla de wijzigingen in het bestand op (in vi: duw "esc" 
-en voer dan "wq!" in) en voer dan volgend commando uit om de locale te genereren
+gewenste locale en verwijder de # aan het begin van de regel. Sla de wijzigingen
+ in het bestand op (in vi: duw "esc" en voer dan "wq!" in). Genereer nu de locale.
 
 ```bash
 [root@archiso /]# locale-gen
 ```
 
-Om de taal in te stellen voer je volgend commando uit
+Om de taal (hier **Engels**") in te stellen voer je volgend commando uit
 
 ```bash
-[root@archiso /]# echo "LANG=nl_BE.UTF-8" > /etc/locale.conf
+[root@archiso /]# echo "LANG=en_US.UTF-8" > /etc/locale.conf
 ```
 
-Het toetsenbord in de console op azerty instellen doen we als volgt:
+Het toetsenbord in de console op **azerty** instellen doen we als volgt:
 
 ```bash
 [root@archiso /]# echo "KEYMAP=be-latin1" > /etc/vconsole.conf
 ```
-
-**Opmerking:** op een professionele server zal de taal altijd ingesteld zijn als en_GB.UTF-8 of en_US.UTF-8
 
 ## Initramfs
 
@@ -322,13 +348,17 @@ Nu gaan we de bestanden genereren die toelaten dat linux geboot kan worden, de *
 [root@archiso /]# mkinitcpio -p linux
 ```
 
-Tijdens het genereren krijgt u een uitvoer gelijkaardig aan onderstaande afbeelding. U zal een waarschuwing krijgen dat firmware **aic94xx** en **wd719x** ontbreken. Deze zijn te negeren (zie **Workshop LAMP expert**](/workshop_lamp_expert.md) om deze waarschuwingen weg te werken).
+Tijdens het genereren krijgt u een uitvoer gelijkaardig aan onderstaande afbeelding.
+ U zal een waarschuwing krijgen dat firmware **aic94xx** en **wd719x** ontbreken. 
+Deze waarschuwingen zullen we wegwerken in [Ontbrekende Firmware](#ontbrekende-firmware)
+nadat **SSH** en **SFTP** zijn geïnstalleerd en geconfigureerd.
 
 ![Initramfs](./afb/initramfs.png)
 
 ## Wachtwoord instellen
 
-Bij een nieuwe installatie moet ook het wachtwoord voor **root** ingesteld worden. Zorg er voor dat u dit gemakkelijk kan onthouden!
+Bij een nieuwe installatie moet ook het wachtwoord voor **root** ingesteld worden. 
+Zorg er voor dat u dit gemakkelijk kan onthouden!
 
 ```bash
 [root@archiso /]# passwd
@@ -339,7 +369,7 @@ Bij een nieuwe installatie moet ook het wachtwoord voor **root** ingesteld worde
 Om er voor te zorgen dat ons netwerk IP-adressen op een juiste manier omzet gaan we een **hostname** instellen. Hiervoor moeten we de bestanden **/etc/hostname** en **/etc/hosts** aanpassen. Indien een andere waarde dan **virtualbox** wil dan vervangt u deze waar nodig.
 
 ```bash
-[root@archiso /]# echo "virtualbox" > /etc/hostname
+[root@archiso /]# echo "virtuallamp" > /etc/hostname
 ```
 
 Open het bestand **/etc/hosts** met **vi** of **nano** en voeg volgende regels toe:
@@ -347,12 +377,14 @@ Open het bestand **/etc/hosts** met **vi** of **nano** en voeg volgende regels t
 ```bash
 127.0.0.1	localhost
 ::1		localhost
-127.0.1.1	virtualbox.localdomain	virtualbox
+127.0.1.1	virtuallamp.localdomain	virtuallamp
 ```
 
 ## Bootloader
 
-Als laatste stap om de installatie af te ronden moeten we ook een bootloader installeren. Deze zorgt voor de verbinding tussen de **BIOS** en de **initramfs**. Zo krijgen we een menu te zien waaruit we kunnen kiezen welk besturingssysteem we starten. Zonder deze bootloader zal de BIOS geen besturingssysteem vinden om te laden! Wij gaan hiervoor gebruik maken van **grub**. Deze wordt niet standaard mee geïnstalleerd dus dit doen we als volgt:
+Als laatste stap om de installatie af te ronden moeten we ook een bootloader installeren. Deze zorgt voor de verbinding tussen de **BIOS** en de **initramfs**. Zo krijgen we een menu te zien waaruit we kunnen kiezen welk besturingssysteem we starten. Zonder deze bootloader zal de BIOS geen besturingssysteem vinden om te laden! Wij gaan hiervoor gebruik maken van **grub**. 
+**os-prober** zorgt er voor dat eventueel andere besturingssystemen zullen gedecteerd worden.
+Deze wordt niet standaard mee geïnstalleerd dus dit doen we als volgt:
 
 ```bash
 [root@archiso /]# pacman -S grub os-prober
@@ -384,13 +416,13 @@ Netwerk instellen
 
 Via het commando **ip link** krijgen we een overzicht van beschikbare netwerk adapters in ons systeem.
 
-![ip link](./afb/ip_link.png)
+![ip link](./afb/ip_link_expert.png)
 
 Onze twee netwerkkaarten zijn down (De namen **enp0s3** en **enp0s8** kunnen verschillen!). Dit komt omdat er nog geen service geactiveerd is die ip's uitdeelt, namelijk **dhcpcd**. We moeten deze service dus eerst activeren en opstarten. Vanaf dan zullen bij elke opstart van het systeem onze netwerkkaarten automatisch een ip ontvangen. 
 
 ```bash
-[root@virtualbox ~]# systemctl enable dhcpcd
-[root@virtualbox ~]# systemctl start dhcpcd
+[root@virtuallamp ~]# systemctl enable dhcpcd
+[root@virtuallamp ~]# systemctl start dhcpcd
 ```
 
 Algemeen kan u steeds volgende commandos's gebruiken bij een systeemservice. Indien u deze commando's niet als root uitvoerd moet u deze steeds via **sudo** uitvoeren!
@@ -408,58 +440,195 @@ systemctl stop <naam service>
 
 Via het commando **ip link** kan u nu controleren of de state UP is voor **enp0s3** en **enp0s8**. U controleert ook best de status van de service **dhcpcd**
 
-![Status dhcpcd](./afb/dhcpcd_status.png)
+![Status dhcpcd](./afb/dhcpcd_status_expert.png)
 
 Herhaal nu ook de commando's, zoals we bij de voorbereiding gedaan hebben, om te controleren of we effectief toegang hebben tot het internet
 
 ```bash
-[root@virtualbox ~]# ping www.google.be
-[root@virtualbox ~]# curl icanhazip.com
+[root@virtuallamp ~]# ping www.google.be
+[root@virtuallamp ~]# curl icanhazip.com
 ```
 
 Aangezien we de **host-only** adapter gebruiken om vanuit ons host besturingssysteem de guest te benaderen, zullen we deze een statisch ip geven. Zo kunnen we telkens eenzelfde ip gebruiken in de host browser om de website te testen. Het statische ip, hier **192.168.56.56**, stellen we in op **enp0s8**. Pas in onderstaand commando **enp0s8** indien uw 2de netwerkkaart een andere naam had.
 
 ```bash
-[root@virtualbox ~]# ip addr add 192.168.56.56/24 broadcast 192.168.56.255 dev enp0s8
+[root@virtuallamp ~]# ip addr add 192.168.56.56/24 broadcast 192.168.56.255 dev enp0s8
 ```
 
 Open nu in je host besturingssysteem een terminal/command prompt en voer **ping 192.168.56.56** uit. Indien dit lukt is je guest nog steeds bereikbaar en is de netwerkconfiguratie ook afgerond!
 
 Het nadeel van deze methode is dat de configuratie van het statische ip adres verloren gaat bij afsluiten van de machine. We zouden deze stap dus bij elke boot moeten herhalen, wat heel omslachtig is! 
 
-Om dit op te vangen gaan we een configuratiebestand aanmaken waar de details voor **enp0s8** in opgeslagen zitten zodat het statische ip bij elke boot geladen wordt. Open hiervoor het bestand **/etc/dhcpd.conf** met **vi** of **nano** en voeg onderaan volgende inhoud toe:
+Om dit op te vangen gaan we een configuratiebestand aanmaken waar de details voor **enp0s8** in opgeslagen zitten zodat het statische ip bij elke boot geladen wordt. Open hiervoor het bestand **/etc/dhcpcd.conf** met **vi** of **nano** en voeg onderaan volgende inhoud toe:
 
 ```bash
-interface=enp0s8
-static ip_address='192.168.56.56/24'
-static routers='192.168.56.1'
+# Statisch IP voor host-only adapter
+interface enp0s8
+static ip_address=192.168.56.56/24
+static routers=192.168.56.1
 ```
 
 Sla de wijzigingen op in het bestand. Herstart nu de machine (**reboot**) en voer na inloggen het commando **ip a** uit. Je zou nog altijd 192.168.56.56/24 moeten zien bij enp0s8 en state UP.
 
-![ip a](./afb/ip_a.png)
+![ip a](./afb/ip_a_expert.png)
 
 **TIP:** om na inloggen een overzicht te krijgen van alle ingeladen services gebruik je
 
 ```bash
-[root@virtualbox ~]# systemctl --type=service
+[root@virtuallamp ~]# systemctl --type=service
 ```
 
 **EXTRA:** om in je shell telkens kleuren te krijgen bij de uitvoer van ls, volstaat het om volgend commando uit te voeren en nadien opnieuw in te loggen. Dit commando zorgt er voor dat er een **alias** aangemaakt wordt en de standaard uitvoer van **ls** aangepast wordt met syntaxcoloring en in jouw bashprofiel wordt geplaatst.
+**ELKE** gebruiker moet dit herhalen indien hij ook standaard coloring wil met ls!
 
 ```bash
-[root@virtualbox ~]# echo "alias 'ls'='ls --color=always'" >> ~/.bash_profile
+[root@virtuallamp ~]# echo "alias 'ls'='ls --color=always'" >> ~/.bash_profile
 ```
 
-![alias ls](./afb/alias_ls.png)
+![alias ls](./afb/alias_ls_expert.png)
 
 Indien je een GUI installeert (komt niet aan bod in deze workshop) en ook in die shell kleuren wilt dan voer je ook onderstaande  command uit.
 
 ```bash
-[root@virtualbox ~]# echo "alias 'ls'='ls --color=always'" >> ~/.bashrc
+[root@virtuallamp ~]# echo "alias 'ls'='ls --color=always'" >> ~/.bashrc
 ```
 
+## Bijkomende pakketten
+
+Om het werken met de terminal wat te vergemakkelijke installeren we ook de pakketten
+**tree** en **vim**. Deze laatste is een verbeterde versie van **vi**.
+
+```bash
+[root@virtuallamp ~]# pacman -S tree vim
+```
+
+## Standaardgebruiker aanmaken
+
+Na deze paragraaf werken we niet langer meer met de **root** user. Alle commando's
+zullen door een **normale** gebruiker uitgevoerd worden in **sudo**. Dit zorgt voor
+een betere beveiliging op het systeem omdat een gebruiker dan enkel zaken kan wijzigen
+indien dit effectief aangegeven wordt. Voer nu onderstaande commando's uit om de
+standaardgebruiker aan te maken, vervang de **virtualbox** door een eigen gebruikersnaam
+indien gewenst.
+
+```bash
+[root@virtuallamp ~]# useradd -mG wheel virtualbox
+[root@virtuallamp ~]# passwd virtualbox
+```
+
+Het eerste commando zorgt er voor dat de user **virtualbox** wordt aangemaakt en zijn
+homemap **/home/virtualbox** gecreëerd wordt. Ook wordt deze gebruiker aan de groep
+**wheel** toegevoegd. Deze groep gaan we gebruiker voor onze **sudo** rechten.
+Met het tweede commando stellen we het wachtwoord van de gebruiker in.
+
+De gebruiker zit nu wel in een groep **wheel** die we **sudo** rechtne willen toekennen.
+Toch moet deze groep eerst nog ingesteld worden als sudogroep. Open het configuratiebestand
+met **visudo** en zoek naar de regel **# %wheel ALL=(ALL) ALL. Verwijder de # aan het begin 
+de regel en sla het bestand op. Alle gebruikers uit de groep **wheel** hebben nu
+toestemming om commando's met **sudo** uit te voeren. Test dit uit als volgt
+
+```bash
+# uitloggen als root
+[root@virtuallamp ~]# exit
+# Log in met de standaardgebruiker
+# Gewone gebruiker kan visudo niet uivoeren
+[virtualbox@virtuallamp ~]$ visudo 
+# Als sudo lukt dit wel
+[virtualbox@virtuallamp ~]$ sudo visudo
+# Sluit visudo af zonder wijzigingen (met :q)
+```
+
+**Aandacht:** het feit dat er een $ op het einde van de commandprompt staat duidt
+op het feit dat u normale rechten heeft. Een # toont aan dat u verhoogde rechten heeft.
+
 Hiermee is de installatie van Arch Linux volledig en kunnen we beginnen met het toevoegen van onze server functionatiteiten.
+
+**Nogmaals, vanaf nu wordt nergens nog rechtstreeks met de user root gewerkt!**
+
+# SSH en SFTP
+
+**SSH** (Secure SHell) laat ons toe om vanuit de host in te loggen op de guest en
+zo commando's uit te voeren. Het voordeel hiervan is dat we niet meer rechtstreeks
+op de virtuele machine zullen werken. Met andere woorden, u kan vanop afstand
+een verbinding maken met de machine. Deze kan daarna gerust op een andere (fysieke) locatie
+zich bevinden.
+
+## Installatie 
+
+**SSH** is een service (deamon) en zal dus moeten toegevoegd en nadien geactiveerd worden.
+Wij kiezen voor **openssh** als pakket om deze service te verzorgen.
+
+Log eerst, indien nodig, in als **standaardgebruiker**
+
+```bash
+[virtualbox@virtuallamp ~]$ sudo pacman -S openssh
+[virtualbox@virtuallamp ~]$ sudo systemctl enable sshd
+[virtualbox@virtuallamp ~]$ sudo systemctl start sshd
+[virtualbox@virtuallamp ~]$ sudo systemctl status sshd
+```
+
+## Configuratie
+
+We hebben nu wel **SSH** geactiveerd maar nog niet ingesteld dat onze standaardgebruiker
+deze service mag gebruiken. Open hiervoor het bestand **/etc/ssh/sshd_config** met **vim** of **nano**
+als **sudo**. Zoek naar de regel **#Port 22**. Verwijder de # aan de start van de regel.
+het is ook aan te raden om het poortnummer in te stellen op een ander nummer. Dit op 22 laten 
+staan zorgt voor een groter beveiligingsrisico omdat dit de standaard poort is van deze service.
+het is echter aan te raden een getal groter dan 1024 te nemen, b.v.: **22222**.
+Ga vervolgens op zoek naar de regel **#Banner none** en wijzig deze naar **Banner /etc/issue**.
+Als laatste wijziging voeg je onderaan in het bestand volgende regel toe:
+**AllowUsers virtualbox**. Deze zorgt er voor dat onze standaardgebruiker toegang
+krijgt om via SSH te verbinden met de virtuele machine. Bewaar nu de wijzigingen in het bestand
+en herstart de service *sshd**. Controleer de status!
+
+Nu **SSH** correct is ingesteld gaan we proberen een verbinding te maken vanuit de host. 
+
+Indien uw hostsysteem **Windows** is kan u gebruik maken van een toepassing **putty**. 
+Dit kan u [**hier**](https://www.putty.org/) downloaden. Open de toepassing en vul **192.168.56.56** in bij host
+en **22222** bij port. Duw dan op 'ok' en als alles goed gaat krijgt u nu de vraag
+om uw gebruikersnaam in te geven en wachtwoord. Nadien bent u als standaardgebruiker ingelogd
+en krijgt u bijhordende commandt prompt te zien.
+
+## TODO screenshot van putty uit windows!!!
+
+Als u **Linux** of **MacOs** als host gebruikt kan u proberen een connectie te 
+maken vanuit de terminal met het commando **ssh virtualbox@192.168.56.56 -p 22222**
+
+Accepteer de boodschap i.v.m. keys. Na invoeren van het wachtwoord komt u in de command
+prompt van de server terecht.
+
+![SSH Linux/MacOs](./afb/ssh_linux.png)
+
+U kan vanaf nu kiezen: ofwel logt u in op de virtuele machine en voert u de commando's
+daar in de terminal uit. U kan ook opteren om vanuit de host via **SSH** te verbinden
+en via deze command prompt te werken. In de kaders met instructie in deze handleiding
+zal u **geen** verschil merken omdat de command prompt er in beide gevallen hetzelfde
+zal uitzien!
+
+## SFTP
+
+**SFTP** (Secure File Transfer Protocol) zal er voor zorgen dat we vanuit de host
+met een FTP-client bestanden kunnen opladen naar de server. Dit is vooral handig
+om (configuratie)bestanden op een eenvoudige manier op de server te plaatsen
+zonder deze manueel te moeten typen en aanpasssen op de server zelf. Door **openssh**
+te installeren en configuren kunnen we ook gebruik maken van **SFTP**. We moeten 
+dus geen aparte **FTP** server opzetten zoals in de basis workshop wel het geval was!
+
+### Verbinden
+
+Om via **SFTP** te verbinden vanuit de host moeten we gebruik maken van een FTP-client.
+Wij kiezen voor [**FileZilla**](http://filezilla-project.org).
+
+Open het programma en ga naar 'File' -> 'Site Manager ...' of via "Ctrl + S". Voeg
+een 'New Site' toe en vul de gegevens aan.
+
+![FileZilla new site](./afb/filezilla_site.png)
+
+Via 'Connect' zal er dan een verbinding gemaakt worden. Accepteer ook hier eerst
+de ongekende sleutel. Indien de verbinding succesvol tot stand is gebracht komen
+ we in de **home** map uit van onze standaardgebruiker.
+
+![FileZilla connectie](./afb/filezilla_connect.png)
 
 # MariaDB 
 
@@ -467,29 +636,29 @@ Aangezien onze webserver een **PHP** applicatie zal draaien die een databank (**
 
 ## Installatie
 
-Om **MariaDB** te installeren loggen we, indien nodig, eerst in onze distribute in als **root**. Na inloggen voeren we de installatie uit met onderstaande commando.
+Om **MariaDB** te installeren loggen we, indien nodig, eerst in onze distribute in als **standaardgebruiker**. Na inloggen voeren we de installatie uit met onderstaande commando.
 
 ```bash
-[root@virtualbox ~]# pacman -S mariadb
+[virtualbox@virtuallamp ~]# sudo pacman -S mariadb
 ```
 
 Nu MariaDB geïnstalleerd is moeten we ook de mappen aanmaken waarin onze databank zijn data zal opslaan. 
 
 ```bash
-[root@virtualbox ~]# mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+[virtualbox@virtuallamp ~]# sudo mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
 ```
 
 Net zoals bij een nieuwe Linux installatie het geval was, is ook bij MySQL het wachtwoord na installatie leeg. Dit moet dus eerst ingesteld worden maar dit is enkel mogelijk als **MariaDB** zelf draait. We hebben op dit moment enkel de installatie gedaan maar net zoals bij **dhcpcd** het geval was draait de service nog niet.
 
 ```bash
-[root@virtualbox ~]# systemctl enable mariadb
-[root@virtualbox ~]# systemctl start mariadb
+[virtualbox@virtuallamp ~]# sudo systemctl enable mariadb
+[virtualbox@virtuallamp ~]# sudo systemctl start mariadb
 ```
 
 Controleer of het starten effectief gelukt is èn de service MariaDB correct draait. 
 
 ```bash
-[root@virtualbox ~]# systemctl status mariadb
+[virtualbox@virtuallamp ~]# sudo systemctl status mariadb
 ```
 
 ![Status MariaDB](./afb/mariadb_status.png)

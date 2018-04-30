@@ -400,12 +400,13 @@ Open nu in je host besturingssysteem een terminal/command prompt en voer **ping 
 
 Het nadeel van deze methode is dat de configuratie van het statische ip adres verloren gaat bij afsluiten van de machine. We zouden deze stap dus bij elke boot moeten herhalen, wat heel omslachtig is! 
 
-Om dit op te vangen gaan we een configuratiebestand aanmaken waar de details voor **enp0s8** in opgeslagen zitten zodat het statische ip bij elke boot geladen wordt. Open hiervoor het bestand **/etc/dhcpd.conf** met **vi** of **nano** en voeg onderaan volgende inhoud toe:
+Om dit op te vangen gaan we een configuratiebestand aanmaken waar de details voor **enp0s8** in opgeslagen zitten zodat het statische ip bij elke boot geladen wordt. Open hiervoor het bestand **/etc/dhcpcd.conf** met **vi** of **nano** en voeg onderaan volgende inhoud toe:
 
 ```bash
-interface=enp0s8
-static ip_address='192.168.56.56/24'
-static routers='192.168.56.1'
+# Statisch IP voor host-only adapter
+interface enp0s8
+static ip_address=192.168.56.56/24
+static routers=192.168.56.1
 ```
 
 Sla de wijzigingen op in het bestand. Herstart nu de machine (**reboot**) en voer na inloggen het commando **ip a** uit. Je zou nog altijd 192.168.56.56/24 moeten zien bij enp0s8 en state UP.
