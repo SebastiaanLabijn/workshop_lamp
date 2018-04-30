@@ -872,13 +872,13 @@ Open nu op de host jouw browser opnieuw en surf naar http://192.168.56.56 Indien
 ![PHP overzichtpagina Apache](./afb/apache_php.png)
 
 Indien dit zo is dan is de integratie van PHP met Apache gelukt. Mocht dit toch niet zo zijn en u krijgt een foutpagina **500** te zien dan zal dit waarschijnlijk aan de rechten liggen van de bestanden.
-PHP bestanden moeten immers kunnen uitgevoerd worden. Controller of de rechten ingesteld staan als **rwxrwdr-x" op index.php in /srv/http/test. Pas deze aan indien dat niet zo was
+PHP bestanden moeten immers kunnen uitgevoerd worden. Controller of de rechten ingesteld staan als **rwxrwxr-x" op index.php in /srv/http/test. Pas deze aan indien dat niet zo was
 
 ```bash
 [virtualbox@virtuallamp ~]$ sudo chmod 775 *.php
 ```
 
-Probeer het nu opnieuw. Nu zou het wel moeten lukken om de pagina te zien.
+Probeer het nu opnieuw. Nu zou het wel moeten lukken om de pagina te zien. Anders zal u wellicht ergens een syntaxfout gemaakt hebben. Schakel **display_errors** aan in **/etc/php/php/ini** en probeer zo verder te debuggen.
 
 **databank.php**
 
