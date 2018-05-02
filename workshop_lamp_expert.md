@@ -830,13 +830,14 @@ Ga nu helemaal naar onder in het bestand en voeg volgende regels toe specifiek v
 # PHP 7
 Include conf/extra/php7_module.conf
 ```
+
 Sla de wijzigen op in het bestand. Controleer of de syntax juist is met **apachectl configtest** en herstart nu de httpd service met **systemctl restart httpd**. Controleer steeds na het herstarten van een service zijn status!
 Indien u nu de browser van je host naar http://192.168.56.56 surft krijgt u niet langer de indexpagina te zien maar een **403** fout dat u geen toegang heeft.
 
 ![403 Apache](./afb/apache_403.png)
 
 Aangezien we de optie aangezet hebben om meerdere applicatie te hosten op onze 
-webserver gaan we nu een **virtual host** toevoegen voor onze testapplicatie. Open het bestand **/etc/httpd/conf/extra/httpd-vhosts.conf** met **vim** of **nano**. Plaats volgende inhoud in het bestand waarmee de huidige virtual hosts die als voorbeeld gedefinieerd werden zullen overschreven worden.
+webserver gaan we nu een **virtual host** toevoegen voor onze testapplicatie. Open het bestand **/etc/httpd/conf/extra/httpd-vhosts.conf** met **vim** of **nano** of download het gewijzigde bestand [hier](./files/httpd-vhosts.conf). Plaats volgende inhoud in het bestand waarmee de huidige virtual hosts die als voorbeeld gedefinieerd werden zullen overschreven worden.
  
 ```bash
 <VirtualHost *:80>
@@ -862,7 +863,7 @@ Als laatste stap gaan we nu twee php pagina's toevoegen op onze website en een *
 
 Maak nu in jouw host besturingssysteem volgende bestanden aan met weergegeven inhoud. Upload telkens elke bestand via SFTP naar jouw homemap. Vandaar verplaatst u het bestand, via de command prompt, naar **srv/http/test/** d.m.v. **sudo** rechten.
 
-**index.php**
+**index.php** [Downloaden](./files/index.php)
 
 ```php
 <?php phpinfo(); ?>
@@ -881,7 +882,7 @@ PHP bestanden moeten immers kunnen uitgevoerd worden. Controller of de rechten i
 
 Probeer het nu opnieuw. Nu zou het wel moeten lukken om de pagina te zien. Anders zal u wellicht ergens een syntaxfout gemaakt hebben. Schakel **display_errors** aan in **/etc/php/php/ini** en probeer zo verder te debuggen.
 
-**databank.php**
+**databank.php** [Downloaden](./files/databank.php)
 
 ```php
 <?php
@@ -927,7 +928,7 @@ Dit betekent dat we onze MySQL databank kunnen aanspreken vanuit PHP op onze Apa
 
 **EXTRA:** om onze server mooier af te schermen tegen foute URL's gaan we een .htaccess bestand gebruiken. Dit zorgt er voor dat bij een Apache paginafout 403, 404, of 500 de gebruiker doorverwezen wordt naar de indexpagina.
 
-**.htaccess**
+**.htaccess** [Downloaden](./files/.htaccess)
 
 ```bash
 ErrorDocument 403 /index.php
@@ -1017,7 +1018,7 @@ Indien u een gedeelde map wil gebruiken moet u nu eerst de virtuele machine afsl
 
 ## Ontbrekende firmware
 
-Als laatste uitbreiding zullen we de waarschuwing bij het aanmaken van de initramfs wegwerken door de firmware voor **aic94xx** en **wd719x** te installeren.
+Met deze uitbreiding zullen we de waarschuwing bij het aanmaken van de initramfs wegwerken door de firmware voor **aic94xx** en **wd719x** te installeren.
 Download de tars met firmwares [hier](https://aur.archlinux.org/cgit/aur.git/snapshot/aic94xx-firmware.tar.gz) en [hier](https://aur.archlinux.org/cgit/aur.git/snapshot/wd719x-firmware.tar.gz).
 Upload deze tars nu naar jouw server en voer onderstaande instructies uit
 
@@ -1040,3 +1041,7 @@ Indien het gelukt is kan u ook de tars de mappen van de tars in u homemap verwij
 [virtualbox@virtuallamp ~]$ rm *-firmware.tar.gz
 [virtualbox@virtuallamp ~]$ rm -rf *-firmware
 ```
+
+## Kleuren in console
+
+Met deze laatste uitbreidinge zullen we er voor zorgen dat de command prompt en uitvoer van bepaalde commando's voor iedereen gebruik kan maken van syntaxcoloring.
