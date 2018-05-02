@@ -1049,4 +1049,15 @@ Indien het gelukt is kan u ook de tars de mappen van de tars in u homemap verwij
 
 ## Kleuren in console
 
-Met deze laatste uitbreidinge zullen we er voor zorgen dat de command prompt en uitvoer van bepaalde commando's voor iedereen gebruik kan maken van syntaxcoloring.
+Met deze laatste uitbreidinge zullen we er voor zorgen dat de command prompt en uitvoer van bepaalde commando's voor iedereen gebruik kan maken van syntaxcoloring. We maken eerste een backup van het huidige bashrc bestand zodat we indien nodig dit later kunnen terugzetten
+
+```bash
+# kopie maken lokale bashrc (Geeft error indien bestand niet bestond, te negeren)
+# Indien er meerdere gebruikers zijn, voor elke gebruiker herhalen
+[virtualbox@virtuallamp ~]$ sudo cp ~/.bashrc ~/.bashrc.bak
+# Kopie maken van algemene template
+[virtualbox@virtuallamp ~]$ sudo cp /etc/bash.bashrc /etc/bash.bashrc.bak
+```
+
+Plaats nu de bestanden [bash.bashrc](./files/bash.bashrc) en [DIR_COLORS](./files/DIR_COLORS) in de map **/etc**.
+Log daarna uit als gebruiker. Vanaf nu zal elke bestaande gebruiker die inlogt, of elke nieuwe aangemaakte gebruiker, dit template gebruiken
