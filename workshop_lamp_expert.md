@@ -848,7 +848,7 @@ webserver gaan we nu een **virtual host** toevoegen voor onze testapplicatie. Op
     DocumentRoot "/srv/http/test"
     ServerName www.virtuallamp.com
     ErrorLog "/var/log/httpd/virtuallamp.com-error_log"
-</VirtualHost
+</VirtualHost>
 ```
 
 Herstart nu de httpd service met **systemctl restart httpd**. Controleer steeds na het herstarten van een service zijn status!
