@@ -1059,5 +1059,4 @@ Met deze laatste uitbreidinge zullen we er voor zorgen dat de command prompt en 
 [virtualbox@virtuallamp ~]$ sudo cp /etc/bash.bashrc /etc/bash.bashrc.bak
 ```
 
-Plaats nu de bestanden [bash.bashrc](./files/bash.bashrc) en [DIR_COLORS](./files/DIR_COLORS) in de map **/etc**.
-Log daarna uit als gebruiker. Vanaf nu zal elke bestaande gebruiker die inlogt, of elke nieuwe aangemaakte gebruiker, dit template gebruiken
+Plaats nu de bestanden [bash.bashrc](./files/bash.bashrc), [DIR_COLORS](./files/DIR_COLORS) en [inputrc](./files/inputrc) in de map **/etc**. Log daarna uit als gebruiker. Vanaf nu zal elke bestaande gebruiker die inlogt, of elke nieuwe aangemaakte gebruiker, dit template gebruiken.
