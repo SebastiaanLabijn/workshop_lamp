@@ -16,6 +16,7 @@ author: ing. Sebastiaan Labijn
 	* [phpMyAdmin](#phpmyadmin)
 	* [VirtualBox GuestAdditions](#virtualbox-guestadditions)
 	* [Ontbrekende firmware](#ontbrekende-firmware)
+	* [Kleuren in console](#kleuren-in-console)
 
 # Inleiding
 
@@ -969,6 +970,7 @@ Include conf/extra/phpmyadmin.conf
 
 Aangezien dit bestand **/etc/httpd/conf/extra/phpmyadmin.conf** nog niet bestaat gaan we dit nu aanmaken. Open nadien het bestand met **vi** of **nano** en voeg volgende inhoud toe:
 
+** phpmyadmin.conf** ([Downloaden](./files/phpmyadmin.conf))
 ```bash
 Alias /phpmyadmin "/usr/share/webapps/phpMyAdmin"
 <Directory "/usr/share/webapps/phpMyAdmin">
