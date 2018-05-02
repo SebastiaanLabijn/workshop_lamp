@@ -35,6 +35,7 @@ Afspraken doorheen deze workshop:
 * (deel)inhoud van bestanden is in een kader afgedrukt (indien mogelijk met syntaxcoloring)
 * enkel de basis installatie wordt als root uitgevoerd. De configuratie nadien 
 gebeurt met een gebruiker met sudo rechten
+* het is mogelijk om sommige (configuratie)bestanden rechtstreeks te downloaden i.p.v. de wijzingingen aan te brengen zoals beschreven in de tekst. Controleer zeker of u geen waarden in het bestand nog moet aanpassen indien nodig!
 
 In deze uitgebreidere versie van de workshop wordt er ook meer aandacht besteed 
 aan beveiliging van de server door o.a. meerdere gebruikers en partities aan te 
@@ -840,6 +841,7 @@ Indien u nu de browser van je host naar http://192.168.56.56 surft krijgt u niet
 Aangezien we de optie aangezet hebben om meerdere applicatie te hosten op onze 
 webserver gaan we nu een **virtual host** toevoegen voor onze testapplicatie. Open het bestand **/etc/httpd/conf/extra/httpd-vhosts.conf** met **vim** of **nano** of download het gewijzigde bestand [hier](./files/httpd-vhosts.conf). Plaats volgende inhoud in het bestand waarmee de huidige virtual hosts die als voorbeeld gedefinieerd werden zullen overschreven worden.
  
+**httpd-vhosts.conf** ([Downloaden](./files/httpd-vhosts.conf)) 
 ```bash
 <VirtualHost *:80>
     ServerAdmin webmaster@virtuallamp.com
@@ -864,7 +866,7 @@ Als laatste stap gaan we nu twee php pagina's toevoegen op onze website en een *
 
 Maak nu in jouw host besturingssysteem volgende bestanden aan met weergegeven inhoud. Upload telkens elke bestand via SFTP naar jouw homemap. Vandaar verplaatst u het bestand, via de command prompt, naar **srv/http/test/** d.m.v. **sudo** rechten.
 
-**index.php** [Downloaden](./files/index.php)
+**index.php** ([Downloaden](./files/index.php))
 
 ```php
 <?php phpinfo(); ?>
@@ -883,7 +885,7 @@ PHP bestanden moeten immers kunnen uitgevoerd worden. Controller of de rechten i
 
 Probeer het nu opnieuw. Nu zou het wel moeten lukken om de pagina te zien. Anders zal u wellicht ergens een syntaxfout gemaakt hebben. Schakel **display_errors** aan in **/etc/php/php/ini** en probeer zo verder te debuggen.
 
-**databank.php** [Downloaden](./files/databank.php)
+**databank.php** ([Downloaden](./files/databank.php))
 
 ```php
 <?php
@@ -929,7 +931,7 @@ Dit betekent dat we onze MySQL databank kunnen aanspreken vanuit PHP op onze Apa
 
 **EXTRA:** om onze server mooier af te schermen tegen foute URL's gaan we een .htaccess bestand gebruiken. Dit zorgt er voor dat bij een Apache paginafout 403, 404, of 500 de gebruiker doorverwezen wordt naar de indexpagina.
 
-**.htaccess** [Downloaden](./files/.htaccess)
+**.htaccess** ([Downloaden](./files/.htaccess))
 
 ```bash
 ErrorDocument 403 /index.php
@@ -970,7 +972,8 @@ Include conf/extra/phpmyadmin.conf
 
 Aangezien dit bestand **/etc/httpd/conf/extra/phpmyadmin.conf** nog niet bestaat gaan we dit nu aanmaken. Open nadien het bestand met **vi** of **nano** en voeg volgende inhoud toe:
 
-** phpmyadmin.conf** ([Downloaden](./files/phpmyadmin.conf))
+**phpmyadmin.conf** ([Downloaden](./files/phpmyadmin.conf))
+
 ```bash
 Alias /phpmyadmin "/usr/share/webapps/phpMyAdmin"
 <Directory "/usr/share/webapps/phpMyAdmin">
