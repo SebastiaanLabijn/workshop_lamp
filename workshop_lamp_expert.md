@@ -720,10 +720,10 @@ Verbinden als **testdata** zal enkel lukken indien ook de databank **test** werd
 [virtualbox@virtuallamp ~]$ mysql test -u testdata -p
 ```
 
-Het is immers de enigste databank waarvoor hij rechten heeft. Verbinden als **testadmin** mag niet lukken omdat deze geen rechten heeft om via **localhost** te verbinden. Deze kan enkel verbinden via **phpMyAdmin**.
+Het is immers de enigste databank waarvoor hij rechten heeft. Verbinden als **testadmin** mag niet lukken omdat deze geen rechten heeft om via **localhost** te verbinden. Deze kan enkel verbinden via een adres **192.168.56.%**. Om deze gebruiker te testen maken we gebruik van een extern programma [**MySQL workbench**](https://www.mysql.com/products/workbench/). 
+Let op: **root** en **testdata** zullen niet kunnen verbinden via de **MySQL workbench** omdat zij geen **grants** hebben voor dat IP. U moet deze nog extra toevoegen indien gewenst!
 
-**EXTRA:** om niet altijd alle SQL queries via command prompt te moeten ingeven kan je ook het pakket **phpMyAdmin** installeren om via de browser op de host jouw databank te beheren (zie [Uitbreidingen](#uitbreidingen)).
-Via **phpMyAdmin** zal de gebruiker **testadmin** wel kunnen verbinden met de databank **test** om deze te beheren.
+**EXTRA:** om niet altijd alle SQL queries via command prompt te moeten ingeven kan je ook het pakket **phpMyAdmin** installeren om via de browser op de host jouw databank te beheren (zie [Uitbreidingen](#uitbreidingen)). Uiteraard kan de databank even goed beheerd worden via de **MySQL workbench** maar dan moeten ook de **grants** goed ingesteld zijn voor de bijhorende gebruikers.
 
 # PHP
 
@@ -999,7 +999,7 @@ Probeer op deze startpagina als root in te loggen met uw **mysql wachtwoord**. N
  
 ![Dashboard phpmyadmin](./afb/phpmyadmin_dashboard.png)
 
-Probeer nadien ook even in te loggen als **testadmin**. Dit zou nu ook moeten lukken. Hierdoor is de installatie van **phpMyAdmin** geslaagd. Links in de boomstructuur kan u de aangemaakte database test terugvinden. Als u deze openklapt kan u de tabel user terugvinden en eventueel aanpassen.
+Probeer nadien ook even in te loggen als **testadmin** en **testdata**. Dit zou nu ook moeten lukken. Hierdoor is de installatie van **phpMyAdmin** geslaagd. Links in de boomstructuur kan u de aangemaakte database test terugvinden. Als u deze openklapt kan u de tabel user terugvinden en eventueel aanpassen.
 
 ## VirtualBox GuestAdditions
 
