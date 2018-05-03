@@ -35,7 +35,7 @@ Afspraken doorheen deze workshop:
 * (deel)inhoud van bestanden is in een kader afgedrukt (indien mogelijk met syntaxcoloring)
 * enkel de basis installatie wordt als root uitgevoerd. De configuratie nadien 
 gebeurt met een gebruiker met sudo rechten
-* het is mogelijk om sommige (configuratie)bestanden rechtstreeks te downloaden i.p.v. de wijzingingen aan te brengen zoals beschreven in de tekst. Controleer zeker of u geen waarden in het bestand nog moet aanpassen indien nodig!
+* het is mogelijk om sommige (configuratie)bestanden rechtstreeks te downloaden (Rechtermuisknop -> Link opslaan) i.p.v. de wijzingingen aan te brengen zoals beschreven in de tekst. Controleer zeker of u geen waarden in het bestand nog moet aanpassen indien nodig!
 
 In deze uitgebreidere versie van de workshop wordt er ook meer aandacht besteed 
 aan beveiliging van de server door o.a. meerdere gebruikers en partities aan te 
