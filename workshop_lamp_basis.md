@@ -1,9 +1,6 @@
----
-title: Workshop LAMP
-author: ing. Sebastiaan Labijn
----
+# Workshop LAMP (Basis)
 
-# Inhoudsopgave
+## Inhoudsopgave
 
 1. [Inleiding](#inleiding)
 2. [Voorbereiding](#voorbereiding)
@@ -17,7 +14,7 @@ author: ing. Sebastiaan Labijn
 	* [VirtualBox GuestAdditions](#virtualbox-guestadditions)
 	* [Synchronisatie bestanden server via gedeelde map](#synchronisatie-bestanden-server-via-gedeelde-map)
 
-# Inleiding
+## Inleiding
 
 Tijdens deze workshop gaan we in **VirtualBox** een eenvoudige webserver installeren 
 en configureren. Dit gaan we doen door een zogenaamde **LAMP** stack op te zetten. 
@@ -37,9 +34,9 @@ extra accounts gebruikt
 
 Voor een uitgebreidere workshop waarbij o.a. meerdere gebruikers en partities gebruikt worden kan u terecht in [**Workshop LAMP expert**](/workshop_lamp_expert.md).
 
-# Voorbereiding
+## Voorbereiding
 
-## Linux distributie downloaden
+### Linux distributie downloaden
 
 ![Logo Arch Linux](./afb/arch_logo.png)
 
@@ -51,7 +48,7 @@ Als Linux distributie kiezen we voor [**Arch Linux**](https://www.archlinux.org/
 distributie ook een uitgebreide documentatie terug te vinden op 
 [**ArchWiki**](https://wiki.archlinux.org/).
 
-## Aanmaken nieuwe virtuele machine
+### Aanmaken nieuwe virtuele machine
 
 Maak eerst een nieuw host-only network aan. Dit doe je door in **virtualbox** de 
 'Host Network Manager' te openen. Kies nadien voor 'create' om een nieuwe adapter aan
@@ -67,9 +64,9 @@ Maak nu in VirtualBox een nieuwe machine aan met volgende parameters:
 	* 1: NAT
 	* 2: Host-Only (Kies bij 'name'  de aangemaakte netwerkadapter van hierboven)
 
-# Arch Linux
+## Arch Linux
 
-## Voorbereiding
+### Voorbereiding
 
 Start de virtuele machine en kies het ISO bestand van ArchLinux om op te starten.
 U krijgt volgend scherm te zien
@@ -82,7 +79,7 @@ Aangezien we nog geen besturingssysteem geïnstalleerd hebben kiezen we voor
 
 ![Booted Live Arch Linux](./afb/arch_boot.png)
 
-## Toestenbordindeling instellen
+### Toestenbordindeling instellen
 
 Aangezien standaard de US-indeling geladen wordt zal het toetsenbord dus ook in 
 **qwerty** formaat staan. Om over te schakelen naar **azerty** laden we de juiste
@@ -92,7 +89,7 @@ Aangezien standaard de US-indeling geladen wordt zal het toetsenbord dus ook in
 root@archiso ~ # loadkeys be-latin1
 ```
 
-## Controleren of we met het internet verbonden zijn
+### Controleren of we met het internet verbonden zijn
 
 Tijdens en na de installatie zullen we pakketten moeten downloaden. Daarom moeten
  we zeker zijn dat we verbonden zijn met het internet. Om de verbinding te controleren
@@ -114,7 +111,7 @@ root@archiso ~ # curl icanhazip.com
 Als uitvoer van dat commando zou je het externe ip van jouw machine moeten zien
  verschijnen. Indien dat niet zo is heb je geen toegang tot het internet.
 
-## Klok goed zetten	
+### Klok goed zetten	
 
 De initiële waarde van de systeemklok is niet altijd accuraat. Om deze bij te
  stellen voeren we volgend commando uit:
@@ -123,7 +120,7 @@ De initiële waarde van de systeemklok is niet altijd accuraat. Om deze bij te
 root@archiso ~ # timedatectl set-ntp true
 ```
 
-## Harde schijf voorbereiden
+### Harde schijf voorbereiden
 
 Aangezien we een nieuw systeem installeren met een nieuwe harde schijf moeten we
  deze eerst partitioneren zodat we straks **Linux** op een partitie kunnen 
@@ -192,7 +189,7 @@ wordt onze partitie geformatteerd naar ext4
 root@archiso ~ # mkfs.ext4 /dev/sda1
 ```
 
-## Installeren basis ArchLinux
+### Installeren basis ArchLinux
 
 Nu we een geformatteerde harde schijf hebben moeten we deze eerst **mounten** om de 
 installatie verder te zetten. We kunnen enkel een harde schijf benaderen indien
@@ -216,7 +213,7 @@ Dit kan dus even duren. Nadat de installatie voltooid is hebben we een basissyst
 maar dit dient eerst nog verder geconfigureerd te worden alvorens de machine te 
 herstarten!
 
-## Fstab genereren
+### Fstab genereren
 
 In het bestand **fstab** (in de map /etc) zit een tabel met een overzicht van 
 alle apparaten die deel uitmaken van het filesystem. De inhoud kan u bekijken via
@@ -245,7 +242,7 @@ root@archiso ~ # arch-chroot /mnt
 
 Merk op dat hierdoor ook de command prompt aangepast werd!!
 
-## Tijdzone instellen
+### Tijdzone instellen
 
 De tijdzone stellen we in door een symbolische link aan te maken tussen de gewenste
  tijdzone en **/etc/localtime**. Het volgende commando stelt de tijdzone in als Brussels
@@ -262,7 +259,7 @@ Synchroniseer daarna de tijd met:
 
 Controleer tenslotte of de datum en tijd correct zijn met het commando **date**
 
-## Taal & Regio instellen
+### Taal & Regio instellen
 
 Open het bestand **/etc/locale.gen** met **nano** of **vi**. Zoek de regel met 
 gewenste locale en verwijder de # aan het begin van de regel. Voor Belgische
@@ -287,7 +284,7 @@ Het toetsenbord in de console op azerty instellen doen we als volgt:
 
 **Opmerking:** op een professionele server zal de taal altijd ingesteld zijn als en_GB.UTF-8 of en_US.UTF-8
 
-## Initramfs
+### Initramfs
 
 Nu gaan we de bestanden genereren die toelaten dat linux geboot kan worden, de **initial ramdisk** bestanden.
 
@@ -295,11 +292,11 @@ Nu gaan we de bestanden genereren die toelaten dat linux geboot kan worden, de *
 [root@archiso /]# mkinitcpio -p linux
 ```
 
-Tijdens het genereren krijgt u een uitvoer gelijkaardig aan onderstaande afbeelding. U zal een waarschuwing krijgen dat firmware **aic94xx** en **wd719x** ontbreken. Deze zijn te negeren (zie **Workshop LAMP expert**](/workshop_lamp_expert.md) om deze waarschuwingen weg te werken).
+Tijdens het genereren krijgt u een uitvoer gelijkaardig aan onderstaande afbeelding. U zal een waarschuwing krijgen dat firmware **aic94xx** en **wd719x** ontbreken. Deze zijn te negeren (zie [**Workshop LAMP expert**](./workshop_lamp_expert.md) om deze waarschuwingen weg te werken).
 
 ![Initramfs](./afb/initramfs.png)
 
-## Wachtwoord instellen
+### Wachtwoord instellen
 
 Bij een nieuwe installatie moet ook het wachtwoord voor **root** ingesteld worden. Zorg er voor dat u dit gemakkelijk kan onthouden!
 
@@ -307,7 +304,7 @@ Bij een nieuwe installatie moet ook het wachtwoord voor **root** ingesteld worde
 [root@archiso /]# passwd
 ```
 
-## Hostname instellen
+### Hostname instellen
 
 Om er voor te zorgen dat ons netwerk IP-adressen op een juiste manier omzet gaan we een **hostname** instellen. Hiervoor moeten we de bestanden **/etc/hostname** en **/etc/hosts** aanpassen. Indien een andere waarde dan **virtualbox** wil dan vervangt u deze waar nodig.
 
@@ -323,7 +320,7 @@ Open het bestand **/etc/hosts** met **vi** of **nano** en voeg volgende regels t
 127.0.1.1	virtualbox.localdomain	virtualbox
 ```
 
-## Bootloader
+### Bootloader
 
 Als laatste stap om de installatie af te ronden moeten we ook een bootloader installeren. Deze zorgt voor de verbinding tussen de **BIOS** en de **initramfs**. Zo krijgen we een menu te zien waaruit we kunnen kiezen welk besturingssysteem we starten. Zonder deze bootloader zal de BIOS geen besturingssysteem vinden om te laden! Wij gaan hiervoor gebruik maken van **grub**. Deze wordt niet standaard mee geïnstalleerd dus dit doen we als volgt:
 
@@ -353,7 +350,7 @@ Selecteer de eerste optie 'Arch Linux, with Linux core repo kernel' en als alles
 
 **Hierdoor is de installatie van Linux geslaagd MAAR hebben we nog geen netwerk …!**
 
-Netwerk instellen
+### Netwerk instellen
 
 Via het commando **ip link** krijgen we een overzicht van beschikbare netwerk adapters in ons systeem.
 
@@ -435,11 +432,11 @@ Indien je een GUI installeert (komt niet aan bod in deze workshop) en ook in die
 
 Hiermee is de installatie van Arch Linux volledig en kunnen we beginnen met het toevoegen van onze server functionatiteiten.
 
-# MariaDB 
+## MariaDB 
 
 Aangezien onze webserver een **PHP** applicatie zal draaien die een databank (**MySQL**) gebruikt zullen we eerst de databank installeren en configureren, nadien volgt PHP.
 
-## Installatie
+### Installatie
 
 Om **MariaDB** te installeren loggen we, indien nodig, eerst in onze distribute in als **root**. Na inloggen voeren we de installatie uit met onderstaande commando.
 
@@ -468,11 +465,11 @@ Controleer of het starten effectief gelukt is èn de service MariaDB correct dra
 
 ![Status MariaDB](./afb/mariadb_status.png)
 
-## Configuratie
+### Configuratie
 
 Nu onze service draait kunnen we dus ook het wachtwoord voor de mysql rootgebruiker aanpassen. Voer hiervoor **mysql_secure_installtion** uit. Het huidige wachtwoord is leeg dus duw bij de eerste vraag op "enter". Antwoord nadien op elke vraag met "Y" en voer indien gevraagd het gewenste nieuwe wachtwoord in.
 
-## Testdatabank aanmaken
+### Testdatabank aanmaken
 
 Nu de configuratie van MariaDB zelf voltooid is kunnen we onze databank aanmaken die we zullen gebruiken voor onze webapplicatie. Log hiervoor eerst in bij mysql met de user root met het commando **mysql -u root -p**
 Voer bij het wachtwoord dit van mysql in, het wachtwoord dat je in vorige paragraaf hebt ingesteld, EN NIET jouw eigen root wachtwoord! 
@@ -503,11 +500,11 @@ Hiermee is de installatie en configuratie voor MariaDB klaar.
 
 **EXTRA:** om niet altijd alle SQL queries via command prompt te moeten ingeven kan je ook het pakket **phpMyAdmin** installeren om via de browser op de host jouw databank te beheren (zie [Uitbreidingen](#uitbreidingen)).
 
-# PHP
+## PHP
 
 De volgende stap is om **PHP** te installeren. PHP is een eenvoudig aan te leren scripttaal waarbij we serverside inhoud kunnen genereren om zo onze HTML pagina's verrijken.
 
-## Installatie
+### Installatie
 
 Om PHP te installeren loggen we, indien nodig, eerst in onze distribute in als root. Nadien installeren we PHP als volgt:
 
@@ -515,7 +512,7 @@ Om PHP te installeren loggen we, indien nodig, eerst in onze distribute in als r
 [root@virtualbox ~]# pacman -S php
 ```
 
-## Configuratie
+### Configuratie
 
 Nu PHP geïnstalleerd is moeten we ook een aantal zaken gaan configureren. PHP is geen service zoals **MariaDB** of **Apache** en moet dus ook niet geactiveerd worden. Standaard zijn echter heel wat uitbreidingen niet geactiveerd. Aangezien wij via PHP onze MySQL databank wensen te bevragen zullen wij deze functionaliteit moeten activeren. Dit doen door het bestand **/etc/php/php.ini aan te passen**. Open het bestand met **vi** of **nano** en zoek naar de regel **;extension=pdo_mysql** en verwijder de ; aan het begin van de regel om deze extensie te activeren. Sla de wijzigingen in het bestand op. Controleer nu of het bestand **pdo_mysql.so** aanwezig is in de map **/usr/lib/php/modules/**
 
@@ -525,11 +522,11 @@ Nu PHP geïnstalleerd is moeten we ook een aantal zaken gaan configureren. PHP i
 
 Hiermee zit de installatie en configuratie voor PHP er op.
 
-# Apache
+## Apache
 
 Als laatste stap om onze **LAMP** stack te vervolledigen gaan **Apache** installeren. Hierop zullen wij dan een webapplicatie draaien bestaande uit twee eenvoudige PHP pagina's om aan te tonen dat PHP effectief draait en we data uit onze testdatabank kunnen ophalen.
 
-## Installatie
+### Installatie
 
 Om Apache te installeren loggen we, indien nodig, eerst in onze distribute in als root. We installeren naast **Apache** ook al onmiddellijk de uitbreiding voor PHP mee. Na inloggen voeren we in de commandprompt het volgende uit.
 
@@ -554,7 +551,7 @@ Onze Apache webserver draait nu. Dit betekent dat we via een browser in ons host
 
 ![Indexpagina Apache](./afb/apache_index.png)
 
-## Configuratie
+### Configuratie
 
 Nu onze service draait gaan we deze verder configureren zodat we PHP pagina's kunnen laden. Het eerste wat we moeten instellen is de locatie waar de bestanden van onze website zullen komen. Dit doen we door het bestand **/etc/httpd/conf/httpd.conf** aan te passen, dus open dit bestand via **vi** of **nano**. Zoek naar volgende regels:
 
@@ -602,7 +599,7 @@ Sla de wijzigen op in het bestand en herstart nu de httpd service met **systemct
 
 Controleer steeds na het herstarten van een service zijn status!
 
-## Testpagina's toevoegen
+### Testpagina's toevoegen
 
 Als laatste stap gaan we nu twee pagina's toevoegen op onze website. Zoals uit vorige paragraaf bleek moeten we deze bestanden aan de **/srv/http** map toevoegen. Voer volgend command uit om de pagina **index.php** aan te maken waarin we de detaisl van onze PHP installatie weergeven.
 
@@ -660,13 +657,13 @@ Dit betekent dat we onze MySQL databank kunnen aanspreken vanuit PHP op onze Apa
 
 **EXTRA:** om niet altijd bestanden manueel te moeten typen op onze server kiezen we uiteraard voor een gemakkelijkere manier. Enerzijds kan je een **FTP** server (of **SFTP**) opzetten zodat je met een FTP-client vanop de host bestanden kan opladen naar de map van de webserver. Anderzijds kan je ook een script uitvoeren die automatisch alle gewijzigde bestanden uit een gedeelde map op de host kopieert naar de map van de website op de server. Beide oplossingen zijn beschreven in [Uitbreidingen](#uitbreidingen).
 
-# Uitbreidingen
+## Uitbreidingen
 
-## phpMyAdmin
+### phpMyAdmin
 
 Om het beheer van de databank te vergemakkelijken en dus zo het gebruik van **MySQL** prompt zoveel mogelijk te vermijden zullen we gebruik maken van het pakket **phpMyAdmin**. Dit zal ons in staat stellen om via een browser op de host omgeving de databank aan te spreken in de virtualbox en deze te beheren.
 
-### Installatie
+#### Installatie
 
 Indien nodig log je als root in de virtuele machine in. Voer de installatie uit met het commando
 
@@ -676,7 +673,7 @@ Indien nodig log je als root in de virtuele machine in. Voer de installatie uit 
 
 Aangezien deze uitbreiding, zoals de naam al aangeeft, gebruik zal maken van PHP moeten we ook de extensie activeren om met **mysqli** te werken. Open het bestand **/etc/php/php.ini** in **vi** of **nano** en zoek naar de regel **;extension=mysli** en verwijder de ; op het begin van deze regel.
 
-### Configuratie
+#### Configuratie
 
 Nu de extensie ingeschakeld is moeten we ook in **Apache** een directory toevoegen die verwijst naar de **phpMyAdmin** bestanden. Om dit te doen openen we het bestand **/etc/httpd/conf/httpd.conf** in **vi** of **nano**. Zoek naar de **Include** regel van PHP7 (zie [PHP](#php)) en voeg daaronder volgende regels toe:
 
@@ -714,11 +711,11 @@ Probeer op deze startpagina als root in te loggen met uw **mysql wachtwoord**. N
 
 Hierdoor is de installatie van **phpMyAdmin** geslaagd. Links in de boomstructuur kan u de aangemaakte database test terugvinden. Als u deze openklapt kan u de tabel user terugvinden en eventueel aanpassen.
 
-## FTP server
+### FTP server
 
 Momenteel maken we de bestanden onze server manueel aan en wordt ook op de server zelf de inhoud via **vi** of **nano** toegevoegd. Dit is echter zeer omslachting. Om bestanden van uit onze host te kunnen opladen naar onze server gaan we een **FTP** service opzetten met **bftpd** (Voor **SFTP** en **SSH** zie **Workshop LAMP expert**](/workshop_lamp_expert.md)).
 
-### Installatie
+#### Installatie
 
 Indien nodig log je als root in de virtualbox in. Voer de installatie uit met het commando
 
@@ -726,7 +723,7 @@ Indien nodig log je als root in de virtualbox in. Voer de installatie uit met he
 [root@virtualbox ~]# pacman -S bftpd
 ```
 
-### Configuratie
+#### Configuratie
 
 De configuratie van **bftpd** verloopt via het bestand **/etc/bftpd.conf**. Open dit bestand en ga helemaal naar onder. Pas daar de tekst voor user root aan als volgt:
 
@@ -749,11 +746,11 @@ Gebruikt nu een ftp-client op de host, b.v.: **FileZilla**, en maak een verbindi
 
 Indien u iets anders wil dan een bestand downloaden, b.v.: naam wijzigen, bestand opladen, dan is dat enkel mogelijk door gebruik te maken van een FTP-client.
 
-## VirtualBox GuestAdditions
+### VirtualBox GuestAdditions
 
 Het installeren van de **GuestAdditions** zal ons toelaten een paar extra zaken te gebruiken zoals onder andere gedeelde mappen en een gedeeld klembord. Dit kan handig zijn om tekst vanuit een host te kunnen plakken in de guest.
 
-### Installatie
+#### Installatie
 
 Indien nodig, log in als root. Voer daarna de installatie uit.
 
@@ -764,11 +761,11 @@ Indien nodig, log in als root. Voer daarna de installatie uit.
 [root@virtualbox ~]# systemctl start vboxservice
 ```
 
-### Gedeelde map
+#### Gedeelde map
 
 Indien u een gedeelde map wil gebruiken moet u nu eerst de virtuele machine afsluiten (**shutdown -h now**). Open de instellingen van de server in VirtualBox en ga naar 'shared folders'. Voeg hier een nieuwe map toe die je wil delen. Zorg er zeker voor dat de optie auto-mount aangevinkt werd en dat de naam **GEEN** spaties bevat. Start nu de machine opnieuw op en log in als root. In de map **/media** zou nu een map moeten zien met als naam **sf_<naam gedeelde map>**
 
-## Synchronisatie bestanden server via gedeelde map
+### Synchronisatie bestanden server via gedeelde map
 
 Om het manuele werk dat we moeten doen via **FTP** door telkens de bestanden op te laden te vergemakkelijken zullen we bestanden uit een bepaalde map op de host automatisch synchroniseren naar de website map op de server. 
 
@@ -776,7 +773,7 @@ Om het manuele werk dat we moeten doen via **FTP** door telkens de bestanden op 
 
 **AANDACHT:** dit deel gaat er vanuit dat u de **VirtualBox GuestAdditions** al heeft geïnstalleerd (zie [VirtualBox GuestAdditions](#virtualbox-guestadditions)) en een gedeelde map heeft aangemaakt.
 
-### Configuratie
+#### Configuratie
 
 Het script dat automatisch zal synchroniseren zal draaien als een systeemservice. We gaan dus een eigen service schrijven en deze toevoegen. 
 

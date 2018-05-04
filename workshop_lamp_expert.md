@@ -378,7 +378,7 @@ Open het bestand **/etc/hosts** met **vi** of **nano** en voeg volgende regels t
 127.0.1.1	virtuallamp.localdomain	virtuallamp
 ```
 
-## Bootloader
+### Bootloader
 
 Als laatste stap om de installatie af te ronden moeten we ook een bootloader installeren. Deze zorgt voor de verbinding tussen de **BIOS** en de **initramfs**. Zo krijgen we een menu te zien waaruit we kunnen kiezen welk besturingssysteem we starten. Zonder deze bootloader zal de BIOS geen besturingssysteem vinden om te laden! Wij gaan hiervoor gebruik maken van **grub**. 
 **os-prober** zorgt er voor dat eventueel andere besturingssystemen zullen gedecteerd worden.
@@ -410,7 +410,7 @@ Selecteer de eerste optie 'Arch Linux, with Linux core repo kernel' en als alles
 
 **Hierdoor is de installatie van Linux geslaagd MAAR hebben we nog geen netwerk …!**
 
-## Netwerk instellen
+### Netwerk instellen
 
 Via het commando **ip link** krijgen we een overzicht van beschikbare netwerk adapters in ons systeem.
 
