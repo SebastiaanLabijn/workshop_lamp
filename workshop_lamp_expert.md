@@ -694,9 +694,8 @@ Als u na het laatste commando onderstaande uitvoer krijgt is de testdatabank kla
 ## Testgebruiker aanmaken
 
 Om onze databank beter af te schermen gaan we nu nog twee gebruikers aanmaken in **MariaDB**.
-De ene gebruiker **testadmin** zal via **phpMyAdmin** toegang krijgen tot de databank **test** en de mogelijkheid hebben de databank te wijzigen.
-Daarnaast maken we ook een gebruiker **testdata** aan die enkel via de webserver (= localhost) toegang zal hebben tot de databank en waarbij zijn
-toegang beperkt is  tot het uitvoeren van **select, insert, update of delete** queries en dus  geen beheer van de databank zelf.
+De ene gebruiker **testadmin** zal via een databank programma op de host, b.v.: **MySQL workbbench** (zie [hieronder](#mysql-workbench)), toegang krijgen tot de databank **test** en de mogelijkheid hebben de databank te wijzigen.
+Daarnaast maken we ook een gebruiker **testdata** aan die enkel via de webserver (= localhost) toegang zal hebben tot de databank en waarbij zijn toegang beperkt is  tot het uitvoeren van **select, insert, update of delete** queries en dus  geen beheer van de databank zelf. Het voordeel van deze gescheiden werkwijze is dat de gebruiker waarmee onze PHP testwebapplicatie verbindt met de databank, zijnde **testdata**, enkel de databank **test** en zijn tabellen kan aanspraken met **select, insert, update of delete**. Er kan dus geen beheer van de databank zelf worden uitgevoerd! 
 
 ```sql
 MariaDB [(test)] CREATE USER IF NOT EXISTS 'testadmin'@'192.168.56.%' IDENTIFIED BY 'vul hier uw passwoord in');
@@ -718,6 +717,7 @@ Verbinden als **testdata** zal enkel lukken indien ook de databank **test** werd
 ```bash
 [virtualbox@virtuallamp ~]$ mysql test -u testdata -p
 ```
+## MySQL workbench 
 
 Het is immers de enigste databank waarvoor hij rechten heeft. Verbinden als **testadmin** mag niet lukken omdat deze geen rechten heeft om via **localhost** te verbinden. Deze kan enkel verbinden via een adres **192.168.56.%**. Om deze gebruiker te testen maken we gebruik van een extern programma [**MySQL workbench**](https://www.mysql.com/products/workbench/). Maak in dit programma een nieuwe verbinding aan die gebruik maakt van SSH en volgende instellingen.
 
