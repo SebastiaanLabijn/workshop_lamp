@@ -722,11 +722,13 @@ Verbinden als **testdata** zal enkel lukken indien ook de databank **test** werd
 
 Het is immers de enigste databank waarvoor hij rechten heeft. Verbinden als **testadmin** mag niet lukken omdat deze geen rechten heeft om via **localhost** te verbinden. Deze kan enkel verbinden via een adres **192.168.56.%**. Om deze gebruiker te testen maken we gebruik van een extern programma [**MySQL workbench**](https://www.mysql.com/products/workbench/). Maak in dit programma een nieuwe verbinding aan die gebruik maakt van SSH en volgende instellingen.
 
-![MySQL Workbench SSH](./afb/mysqlworkbench_ssh.png)
+![MySQL Workbench SSH (testadmin)](./afb/mysqlworkbench_ssh.png)
 
-Let op: **root** en **testdata** zullen niet kunnen verbinden via de **MySQL workbench** omdat zij geen **grants** hebben voor dat ip. U moet deze nog extra toevoegen indien gewenst ofwel de MySQL hostname veranderen naar 127.0.0.1. 
+Let op: **root** en **testdata** zullen niet kunnen verbinden via de **MySQL workbench** omdat zij geen **grants** hebben voor dat ip. U moet deze nog extra toevoegen indien gewenst ofwel de MySQL hostname veranderen naar **localhost**. 
 
 ![MySQL Workbench no rights](./afb/mysqlworkbench_fail.png)
+
+![MySQL Workbench SSH] (root)(./afb/mysqlworkbench_ssh_root.png)
 
 **EXTRA:** om niet altijd alle SQL queries via command prompt te moeten ingeven kan je ook het pakket **phpMyAdmin** installeren om via de browser op de host jouw databank te beheren (zie [Uitbreidingen](#uitbreidingen)). Uiteraard kan de databank even goed beheerd worden via de **MySQL workbench** maar dan moeten ook de **grants** goed ingesteld zijn voor de bijhorende gebruikers.
 
