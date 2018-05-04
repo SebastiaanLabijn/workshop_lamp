@@ -410,7 +410,7 @@ Selecteer de eerste optie 'Arch Linux, with Linux core repo kernel' en als alles
 
 **Hierdoor is de installatie van Linux geslaagd MAAR hebben we nog geen netwerk …!**
 
-Netwerk instellen
+## Netwerk instellen
 
 Via het commando **ip link** krijgen we een overzicht van beschikbare netwerk adapters in ons systeem.
 
@@ -491,7 +491,7 @@ Indien je een GUI installeert (komt niet aan bod in deze workshop) en ook in die
 [root@virtuallamp ~]# echo "alias 'ls'='ls --color=always'" >> ~/.bashrc
 ```
 
-#### Bijkomende pakketten
+### Bijkomende pakketten
 
 Om het werken met de terminal wat te vergemakkelijke installeren we ook de pakketten
 **tree** en **vim**. Deze laatste is een verbeterde versie van **vi**.
@@ -500,7 +500,7 @@ Om het werken met de terminal wat te vergemakkelijke installeren we ook de pakke
 [root@virtuallamp ~]# pacman -S tree vim
 ```
 
-#### Standaardgebruiker aanmaken
+### Standaardgebruiker aanmaken
 
 Na deze paragraaf werken we niet langer meer met de **root** user. Alle commando's
 zullen door een **normale** gebruiker uitgevoerd worden in **sudo**. Dit zorgt voor
