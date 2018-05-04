@@ -665,7 +665,7 @@ Controleer of het starten effectief gelukt is en de service MariaDB correct draa
 
 ## Configuratie
 
-Nu onze service draait kunnen we dus ook het wachtwoord voor de mysql rootgebruiker aanpassen. Voer hiervoor **mysql_secure_installtion** uit. Het huidige wachtwoord is leeg dus duw bij de eerste vraag op "enter". Antwoord nadien op elke vraag met "Y" en voer indien gevraagd het gewenste nieuwe wachtwoord in. Door overal met "Y" op te antwoorden hebben we er  ook voor gezorgd dat de **root** user enkel op de machine (= localhost) kan inloggen op de databank. Hij kan dus niet via **phpMyAdmin** vanuit de host verbinden.
+Nu onze service draait kunnen we dus ook het wachtwoord voor de mysql rootgebruiker aanpassen. Voer hiervoor **mysql_secure_installtion** uit. Het huidige wachtwoord is leeg dus duw bij de eerste vraag op "enter". Antwoord nadien op elke vraag met "Y" en voer indien gevraagd het gewenste nieuwe wachtwoord in. Door overal met "Y" op te antwoorden hebben we er  ook voor gezorgd dat de **root** user enkel op de machine (= localhost) kan inloggen op de databank.
 
 ## Testdatabank aanmaken
 
@@ -673,8 +673,7 @@ Nu de configuratie van MariaDB zelf voltooid is kunnen we onze databank aanmaken
 Voer bij het wachtwoord dit van mysql in, het wachtwoord dat je in vorige paragraaf hebt ingesteld, EN NIET jouw eigen root wachtwoord! 
 
 Indien je succesvol aangemeld bent zal de prompt er uitzien als **MariaDB [(none)]**. Voer ondertaande commando's één voor één uit om de testdatabank aan te maken
-Het voordeel van nu verbonden te zijn via **SSH** is dat je tekst kan plakken in de command prompt. Zo hoeft u niet alles over te typen
-maar kan u via 'copy' en 'paste' (= rechter muis knop) de tekst overbrengen.
+Het voordeel van nu verbonden te zijn via **SSH** is dat je tekst kan plakken in de command prompt. Zo hoeft u niet alles over te typen maar kan u via 'copy' en 'paste' (= rechter muis knop) de tekst overbrengen.
 
 ```sql
 MariaDB [(none)] create database test;
@@ -724,11 +723,11 @@ Het is immers de enigste databank waarvoor hij rechten heeft. Verbinden als **te
 
 ![MySQL Workbench SSH (testadmin)](./afb/mysqlworkbench_ssh.png)
 
-Let op: **root** en **testdata** zullen niet kunnen verbinden via de **MySQL workbench** omdat zij geen **grants** hebben voor dat ip. U moet deze nog extra toevoegen indien gewenst ofwel de MySQL hostname veranderen naar **localhost**. 
+Let op: **root** en **testdata** zullen niet kunnen verbinden via de **MySQL workbench** omdat zij geen **grants** hebben voor dat ip. U moet deze nog extra toevoegen indien gewenst met een query in MySQL ofwel in de **MySQL workbbench** de MySQL hostname veranderen naar **localhost**. 
 
 ![MySQL Workbench no rights](./afb/mysqlworkbench_fail.png)
 
-![MySQL Workbench SSH] (root)(./afb/mysqlworkbench_ssh_root.png)
+![MySQL Workbench SSH (root)](./afb/mysqlworkbench_ssh_root.png)
 
 **EXTRA:** om niet altijd alle SQL queries via command prompt te moeten ingeven kan je ook het pakket **phpMyAdmin** installeren om via de browser op de host jouw databank te beheren (zie [Uitbreidingen](#uitbreidingen)). Uiteraard kan de databank even goed beheerd worden via de **MySQL workbench** maar dan moeten ook de **grants** goed ingesteld zijn voor de bijhorende gebruikers.
 
