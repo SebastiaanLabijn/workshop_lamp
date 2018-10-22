@@ -329,13 +329,13 @@ gewenste locale en verwijder de # aan het begin van de regel. Sla de wijzigingen
 Om de taal (hier **Engels**") in te stellen voer je volgend commando uit
 
 ```bash
-[root@archiso /]# echo "LANG=en_US.UTF-8" > /etc/locale.conf
+[root@archiso /]# echo 'LANG=en_US.UTF-8' > /etc/locale.conf
 ```
 
 Het toetsenbord in de console op **azerty** instellen doen we als volgt:
 
 ```bash
-[root@archiso /]# echo "KEYMAP=be-latin1" > /etc/vconsole.conf
+[root@archiso /]# echo 'KEYMAP=be-latin1' > /etc/vconsole.conf
 ```
 
 ### Initramfs
@@ -480,7 +480,7 @@ Sla de wijzigingen op in het bestand. Herstart nu de machine (**reboot**) en voe
 **ELKE** gebruiker moet dit herhalen indien hij ook standaard coloring wil met ls! Zie [Uitbreidingen](#uitbreidingen) omdat eenmalig in te stellen voor alle gebruikers.
 
 ```bash
-[root@virtuallamp ~]# echo "alias 'ls'='ls --color=always'" >> ~/.bash_profile
+[root@virtuallamp ~]# echo "alias ls='ls --color=always'" >> ~/.bash_profile
 ```
 
 ![alias ls](./afb/alias_ls_expert.png)
@@ -488,7 +488,7 @@ Sla de wijzigingen op in het bestand. Herstart nu de machine (**reboot**) en voe
 Indien je een GUI installeert (komt niet aan bod in deze workshop) en ook in die shell kleuren wilt dan voer je ook onderstaande  command uit.
 
 ```bash
-[root@virtuallamp ~]# echo "alias 'ls'='ls --color=always'" >> ~/.bashrc
+[root@virtuallamp ~]# echo "alias ls='ls --color=always'" >> ~/.bashrc
 ```
 
 ### Bijkomende pakketten
@@ -512,7 +512,7 @@ indien gewenst. Ook deze gebruiker krijgt standaard coloring bij ls.
 ```bash
 [root@virtuallamp ~]# useradd -mG wheel virtualbox
 [root@virtuallamp ~]# passwd virtualbox
-[root@virtuallamp ~]# echo "alias 'ls'='ls --color=always'" >> /home/virtualbox/.bash_profile
+[root@virtuallamp ~]# echo "alias ls='ls --color=always'" >> /home/virtualbox/.bash_profile
 ```
 
 Het eerste commando zorgt er voor dat de user **virtualbox** wordt aangemaakt en zijn
@@ -1016,7 +1016,7 @@ Indien nodig, log in als root. Voer daarna de installatie uit.
 [virtualbox@virtuallamp ~]$ sudo pacman -S virtualbox-guest-modules-arch
 [virtualbox@virtuallamp ~]$ sudo pacman -S virtualbox-guest-utils
 [virtualbox@virtuallamp ~]$ sudo systemctl enable vboxservice
-[virtualbox@virtuallamp ~]$ sudo systemctl start vboxservicev
+[virtualbox@virtuallamp ~]$ sudo systemctl start vboxservice
 [virtualbox@virtuallamp ~]$ sudo systemctl status vboxservice
 ```
 
@@ -1034,7 +1034,7 @@ Upload deze tars nu naar jouw server en voer onderstaande instructies uit
 [virtualbox@virtuallamp ~]$ tar xvf aic94xx-firmware.tar.gz
 [virtualbox@virtuallamp ~]$ cd aic94xx-firmware
 [virtualbox@virtuallamp ~]$ makepkg -i
-# lha is nodig voor wd719x-firmware, dus pakket installeren
+# lha is nodig voor wd719x-firmware, dus dit pakket eerst installeren
 [virtualbox@virtuallamp ~]$ sudo pacman -S lha
 [virtualbox@virtuallamp ~]$ tar xvf wd719x-firmware.tar.gz
 [virtualbox@virtuallamp ~]$ cd wd719x-firmware
