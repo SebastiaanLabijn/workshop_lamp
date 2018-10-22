@@ -419,7 +419,7 @@ Sla de wijzigingen op in het bestand. Herstart nu de machine (**reboot**) en voe
 **EXTRA:** om in je shell telkens kleuren te krijgen bij de uitvoer van ls, volstaat het om volgend commando uit te voeren en nadien opnieuw in te loggen. Dit commando zorgt er voor dat er een **alias** aangemaakt wordt en de standaard uitvoer van **ls** aangepast wordt met syntaxcoloring en in jouw bashprofiel wordt geplaatst.
 
 ```bash
-[root@virtualbox ~]# echo "alias 'ls'='ls --color=always'" >> ~/.bash_profile
+[root@virtualbox ~]# echo "alias ls='ls --color=always'" >> ~/.bash_profile
 ```
 
 ![alias ls](./afb/alias_ls.png)
@@ -427,7 +427,7 @@ Sla de wijzigingen op in het bestand. Herstart nu de machine (**reboot**) en voe
 Indien je een GUI installeert (komt niet aan bod in deze workshop) en ook in die shell kleuren wilt dan voer je ook onderstaande  command uit.
 
 ```bash
-[root@virtualbox ~]# echo "alias 'ls'='ls --color=always'" >> ~/.bashrc
+[root@virtualbox ~]# echo "alias ls='ls --color=always'" >> ~/.bashrc
 ```
 
 Hiermee is de installatie van Arch Linux volledig en kunnen we beginnen met het toevoegen van onze server functionatiteiten.
