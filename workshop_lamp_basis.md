@@ -273,13 +273,13 @@ en voer dan "wq!" in) en voer dan volgend commando uit om de locale te genereren
 Om de taal in te stellen voer je volgend commando uit
 
 ```bash
-[root@archiso /]# echo "LANG=nl_BE.UTF-8" > /etc/locale.conf
+[root@archiso /]# echo 'LANG=nl_BE.UTF-8' > /etc/locale.conf
 ```
 
 Het toetsenbord in de console op azerty instellen doen we als volgt:
 
 ```bash
-[root@archiso /]# echo "KEYMAP=be-latin1" > /etc/vconsole.conf
+[root@archiso /]# echo 'KEYMAP=be-latin1' > /etc/vconsole.conf
 ```
 
 **Opmerking:** op een professionele server zal de taal altijd ingesteld zijn als en_GB.UTF-8 of en_US.UTF-8
